@@ -2,6 +2,7 @@ package com.alexkang.loopboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
 
 import java.util.List;
 
@@ -66,10 +68,12 @@ public class SampleListAdapter extends BaseAdapter {
                             .inflate(R.layout.sound_clip_row, parent, false);
         }
 
-        Button stopButton = convertView.findViewById(R.id.stop);
+        //Button stopButton = convertView.findViewById(R.id.stop);
         Button rerecordButton = convertView.findViewById(R.id.rerecord);
+        CheckBox muteButton = convertView.findViewById(R.id.mute);
         CheckBox loopButton = convertView.findViewById(R.id.loop);
-        Button playButton = convertView.findViewById(R.id.play);
+        //Button playButton = convertView.findViewById(R.id.play);
+        SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
 
         // Update the state of the loop button.
         loopButton.setChecked(sample.isLooping());
@@ -77,26 +81,26 @@ public class SampleListAdapter extends BaseAdapter {
         // Choose which buttons to show.
         if (sample instanceof ImportedSample) {
             // Show the stop button and hide the rerecord button.
-            stopButton.setVisibility(View.VISIBLE);
+            //stopButton.setVisibility(View.VISIBLE);
             rerecordButton.setVisibility(View.GONE);
         } else {
             // Hide the stop button and show the rerecord button.
-            stopButton.setVisibility(View.GONE);
+            //stopButton.setVisibility(View.GONE);
             rerecordButton.setVisibility(View.VISIBLE);
         }
 
         // Set button listeners.
-        playButton.setText(sample.getName());
+        /*playButton.setText(sample.getName());
         playButton.setOnClickListener(v -> {
             if (sample.isLooping()) {
                 loopButton.setChecked(false);
             }
             sample.play(false);
-        });
-        stopButton.setOnClickListener(v -> {
-            loopButton.setChecked(false);
-            sample.stop();
-        });
+        });*/
+        //stopButton.setOnClickListener(v -> {
+        //    loopButton.setChecked(false);
+        //    sample.stop();
+        //});
         rerecordButton.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
@@ -117,6 +121,36 @@ public class SampleListAdapter extends BaseAdapter {
                 sample.stop();
             }
         });
+
+        muteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                sample.mute(true);
+            } else {
+                sample.mute(false);
+            }
+        });
+
+        volumeSlider.setMax(100);
+        volumeSlider.setProgress(sample.getVolume());
+        //volumeSlider.incrementProgressBy(1);
+        volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                Log.d("volume:",Integer.toString(i));
+                sample.adjustVolume(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
 
         return convertView;
     }

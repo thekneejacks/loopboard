@@ -1,9 +1,11 @@
 package com.alexkang.loopboard;
 
+import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,7 +15,7 @@ import java.util.concurrent.Executors;
 class Recorder {
 
     private static final int AUDIO_CUTOFF_LENGTH = 12000;
-    private static final int MIN_RECORDING_SIZE = 22000;
+    private static final int MIN_RECORDING_SIZE = 8000;
     private static final String TAG = "Recorder";
 
     private final ExecutorService recordExecutor = Executors.newSingleThreadExecutor();

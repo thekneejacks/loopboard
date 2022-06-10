@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="72dp">
+    android:layout_height="75dp">
 
-    <Button
+    <!--<Button
         android:id="@+id/play"
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -15,9 +15,17 @@
         android:background="@drawable/play_button"
         android:textColor="@color/charcoal"
         android:singleLine="true"
-        style="?android:buttonBarButtonStyle" />
+        style="?android:buttonBarButtonStyle" />-->
 
-    <Button
+    <SeekBar
+        android:id="@+id/volume_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:progressDrawable="@drawable/seek_bar"
+        android:thumb="@drawable/seek_thumb"/>
+
+    <!--<Button
         android:id="@+id/stop"
         android:layout_width="72dp"
         android:layout_height="match_parent"
@@ -25,11 +33,21 @@
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:text="@string/stop"
+        style="?android:buttonBarButtonStyle" />-->
+    <CheckBox
+        android:id="@+id/mute"
+        android:layout_width="52dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/mute_button"
+        android:textColor="@android:color/white"
+        android:button="@android:color/transparent"
+        android:textStyle="bold"
+        android:text="MUTE"
         style="?android:buttonBarButtonStyle" />
 
     <Button
         android:id="@+id/rerecord"
-        android:layout_width="72dp"
+        android:layout_width="52dp"
         android:layout_height="match_parent"
         android:background="@drawable/rerecord_button"
         android:textColor="@android:color/white"
@@ -39,7 +57,7 @@
 
     <CheckBox
         android:id="@+id/loop"
-        android:layout_width="72dp"
+        android:layout_width="52dp"
         android:layout_height="match_parent"
         android:background="@drawable/loop_button"
         android:button="@android:color/transparent"
@@ -47,5 +65,6 @@
         android:textStyle="bold"
         android:text="@string/loop"
         style="?android:buttonBarButtonStyle" />
+
 
 </LinearLayout>

@@ -5,4 +5,7 @@
     <color name="loopy_blue">#00A3F5</color>
     <color name="millennial_blue">#ADE4FF</color>
     <color name="charcoal">#636363</color>
+    <color name="seek_bar_background">#ababab</color>
+    <color name="seek_bar_progress">#ffb600</color>
+    <color name="seek_bar_secondary_progress">#3399CC</color>
 </resources>

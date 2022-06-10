@@ -15,12 +15,12 @@ import java.io.IOException;
 class RecordedSample extends Sample {
 
     private static final String TAG = "RecordedSample";
-
     private final String name;
-
     private boolean isLooping;
     private byte[] bytes;
     private AudioTrack audioTrack;
+    private int volume;
+    private boolean isMuted = false;
 
     /**
      * Open a PCM {@link File} and initialize it to play back. This is the correct way to obtain a
@@ -54,12 +54,16 @@ class RecordedSample extends Sample {
 
     private RecordedSample(String name) {
         this.name = name;
+        this.volume = 100;
     }
 
     @Override
     String getName() {
         return name;
     }
+
+    @Override
+    int getVolume() {return volume;}
 
     @Override
     synchronized void play(boolean isLooped) {
@@ -89,6 +93,26 @@ class RecordedSample extends Sample {
     }
 
     @Override
+    synchronized void adjustVolume(int targetVolume) {
+        this.volume = targetVolume;
+        if(this.isMuted) return;
+
+        float finalvolume = (float) (targetVolume / 100.0);
+        //Log.d("actual volume:",Float.toString(finalvolume));
+        audioTrack.setVolume(finalvolume);
+    }
+
+    @Override
+    synchronized void mute(boolean x){
+        this.isMuted = x;
+        if(x) audioTrack.setVolume(0);
+        else {
+            float finalvolume = (float) (this.volume / 100.0);
+            audioTrack.setVolume(finalvolume);
+        }
+    }
+
+    @Override
     synchronized boolean isLooping() {
         return isLooping;
     }
@@ -103,6 +127,8 @@ class RecordedSample extends Sample {
         loadNewSample(bytes);
         Utils.saveRecording(context, name, bytes);
     }
+
+
 
     /** Updates the recorded sample. Overwrites any previous recording in this sample. */
     private void loadNewSample(byte[] bytes) {

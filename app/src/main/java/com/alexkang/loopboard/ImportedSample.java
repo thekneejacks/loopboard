@@ -24,6 +24,11 @@ class ImportedSample extends Sample {
     }
 
     @Override
+    int getVolume() {
+        return 0;
+    }
+
+    @Override
     synchronized void play(boolean isLooped) {
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer.create(context, Uri.parse(sampleFile.getAbsolutePath()));
@@ -50,6 +55,17 @@ class ImportedSample extends Sample {
         }
         mediaPlayer.release();
         mediaPlayer = null;
+    }
+
+    @Override
+    synchronized void adjustVolume(int targetVolume) {
+        float log1 = (float)(Math.log(50-targetVolume)/Math.log(50));
+        mediaPlayer.setVolume(log1,log1);
+    }
+
+    @Override
+    void mute(boolean x) {
+
     }
 
     @Override

@@ -1,0 +1,102 @@
+[
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_rerecord_button.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\rerecord_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_ic_action_stop.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xhdpi\\ic_action_stop.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_loop_button.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\loop_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_ic_action_discard.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xxhdpi\\ic_action_discard.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_record_button_selected.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\record_button_selected.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_ic_action_discard.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-mdpi\\ic_action_discard.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_ic_action_discard.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xhdpi\\ic_action_discard.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_seek_thumb.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\seek_thumb.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_ic_action_stop.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-mdpi\\ic_action_stop.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_play_button.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\play_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_ic_action_discard.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-hdpi\\ic_action_discard.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-mdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\layout_sound_clip_row.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\layout\\sound_clip_row.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_ic_action_stop.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-hdpi\\ic_action_stop.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_ic_action_stop.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xxhdpi\\ic_action_stop.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\layout_save_sample_dialog.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\layout\\save_sample_dialog.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\menu_main.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\menu\\main.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_record_button_unselected.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\record_button_unselected.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_record_button.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\record_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_mute_button.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\mute_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_seek_bar.xml.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\seek_bar.xml"
+    }
+]

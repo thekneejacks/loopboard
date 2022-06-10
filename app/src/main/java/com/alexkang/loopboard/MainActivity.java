@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -23,6 +24,10 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -196,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
 
         // First, add user imported audio files to the top of our sample list. Also, create the
         // LoopBoard directory if it doesn't already exist.
-        try {
+        /*try {
             File importedDir = new File(Utils.IMPORTED_SAMPLE_PATH);
             importedDir.mkdirs();
             for (File file : importedDir.listFiles()) {
@@ -206,11 +211,17 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (NullPointerException e) {
             // No-op. This means that external storage permission was not granted.
-        }
+        }*/
 
         // Next, add samples recorded from this app.
-        for (String fileName : fileList()) {
-            RecordedSample recordedSample = RecordedSample.openSavedSample(this, fileName);
+        ArrayList<String> samplesList = new ArrayList<>();
+        samplesList.addAll(Arrays.asList(fileList()));
+        Collections.sort(samplesList);
+        //Log.d("debug:","now if you'll excuse me...");
+        //for (String x: samplesList) Log.d("debug:",x);
+        for (String x : samplesList) {
+            //Log.d("debug",x);
+            RecordedSample recordedSample = RecordedSample.openSavedSample(this, x);
             if (recordedSample != null) {
                 recordedSamples.add(recordedSample);
             }
@@ -223,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void saveRecording(byte[] recordedBytes) {
 	    // Initialize the name input field for the sample.
-        @SuppressLint("InflateParams") View saveLayout =
+        /*@SuppressLint("InflateParams") View saveLayout =
                 getLayoutInflater().inflate(R.layout.save_sample_dialog, null);
         EditText sampleNameField = saveLayout.findViewById(R.id.sample_name_field);
         sampleNameField.setText(
@@ -256,7 +267,28 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }))
                 .setCancelable(false)
-                .show());
+                .show());*/
+
+        String name = String.format(Locale.ENGLISH, "Sample %d", recordedSamples.size() + 1);
+        if (Utils.saveRecording(getBaseContext(), name, recordedBytes)) {
+            runOnUiThread(() -> {
+                recordedSamples
+                        .add(RecordedSample
+                                .openSavedSample(this, name));
+                Collections.sort(recordedSamples, (e1, e2) -> e1.getName().compareTo(e2.getName()));
+                Log.d("debug:","now if you'll excuse me...");
+                for (RecordedSample x: recordedSamples) Log.d("debug:",x.getName());
+                sampleListAdapter.notifyDataSetChanged();
+                updateTutorialVisibility();
+            });
+        } else {
+            Snackbar.make(
+                    findViewById(R.id.root_layout),
+                    R.string.error_saving,
+                    Snackbar.LENGTH_SHORT).show();
+        }
+
+
     }
 
     private void stopAllSamples() {
