@@ -11,5 +11,9 @@
         android:icon="@drawable/ic_action_stop"
         android:title="@string/action_stop"
         app:showAsAction="ifRoom" />
-
+    <item
+        android:id="@+id/action_playall"
+        android:icon="@drawable/ic_launcher"
+        android:title="Play all samples"
+        app:showAsAction="never" />
 </menu>

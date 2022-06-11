@@ -97,13 +97,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        refreshRecordings();
+        //refreshRecordings();
     }
 
     @Override
 	public void onPause() {
 		super.onPause();
-        stopAllSamples();
+        //stopAllSamples();
 	}
 
     @Override
@@ -140,7 +140,10 @@ public class MainActivity extends AppCompatActivity {
                 stopAllSamples();
 
                 return true;
-            default:
+            case R.id.action_playall:
+                playAllSamples();
+                return true;
+                default:
                 return true;
         }
     }
@@ -300,6 +303,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Refresh the list to update button states.
+        sampleListAdapter.notifyDataSetChanged();
+    }
+
+    private void playAllSamples() {
+        for (Sample sample : recordedSamples) {
+            if(!sample.isLooping()) {
+                sample.play(true);
+            }
+        }
         sampleListAdapter.notifyDataSetChanged();
     }
 

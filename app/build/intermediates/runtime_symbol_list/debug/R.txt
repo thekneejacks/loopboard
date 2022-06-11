@@ -770,6 +770,7 @@ int id action_menu_presenter 0x7f080014
 int id action_mode_bar 0x7f080015
 int id action_mode_bar_stub 0x7f080016
 int id action_mode_close_button 0x7f080017
+int id action_playall 0x7f0800ba
 int id action_stop 0x7f080018
 int id action_text 0x7f080019
 int id actions 0x7f08001a
