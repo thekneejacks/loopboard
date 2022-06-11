@@ -8,7 +8,10 @@
         <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/play_button.xml" value="0.2985" />
         <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/rerecord_button.xml" value="0.2985" />
         <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/seek_bar.xml" value="0.2985" />
+        <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/seek_bar_pitch.xml" value="0.2985" />
         <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/seek_bar_thumb.xml" value="0.2985" />
+        <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/seek_thumb.xml" value="0.2985" />
+        <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/drawable/seek_thumb_pitch.xml" value="0.2985" />
         <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/layout/activity_main.xml" value="0.3614583333333333" />
         <entry key="..\:/Users/wohnton/Documents/GitHub/loopboard/app/src/main/res/layout/sound_clip_row.xml" value="0.3614583333333333" />
       </map>

@@ -17,13 +17,34 @@
         android:singleLine="true"
         style="?android:buttonBarButtonStyle" />-->
 
-    <SeekBar
-        android:id="@+id/volume_slider"
+
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:progressDrawable="@drawable/seek_bar"
-        android:thumb="@drawable/seek_thumb"/>
+        android:orientation="vertical">
+
+        <SeekBar
+            android:id="@+id/volume_slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:progressDrawable="@drawable/seek_bar"
+            android:thumb="@drawable/seek_thumb"/>
+
+        <SeekBar
+            android:id="@+id/pitch_slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:progressDrawable="@drawable/seek_bar_pitch"
+            android:thumb="@drawable/seek_thumb_pitch"/>
+
+
+    </LinearLayout>
+
+
 
     <!--<Button
         android:id="@+id/stop"
@@ -65,6 +86,8 @@
         android:textStyle="bold"
         android:text="@string/loop"
         style="?android:buttonBarButtonStyle" />
+
+
 
 
 </LinearLayout>

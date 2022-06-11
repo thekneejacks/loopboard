@@ -74,6 +74,7 @@ public class SampleListAdapter extends BaseAdapter {
         CheckBox loopButton = convertView.findViewById(R.id.loop);
         //Button playButton = convertView.findViewById(R.id.play);
         SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
+        SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
 
         // Update the state of the loop button.
         loopButton.setChecked(sample.isLooping());
@@ -115,6 +116,8 @@ public class SampleListAdapter extends BaseAdapter {
             return true;
         });
         loopButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sample.adjustVolume(volumeSlider.getProgress());
+            sample.adjustPitch(pitchSlider.getProgress());
             if (isChecked) {
                 sample.play(true);
             } else {
@@ -132,12 +135,36 @@ public class SampleListAdapter extends BaseAdapter {
 
         volumeSlider.setMax(100);
         volumeSlider.setProgress(sample.getVolume());
-        //volumeSlider.incrementProgressBy(1);
         volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                Log.d("volume:",Integer.toString(i));
                 sample.adjustVolume(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        pitchSlider.setMax(88200);
+        pitchSlider.setMin(1);
+        pitchSlider.setProgress(sample.getPitch());
+        pitchSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                sample.adjustPitch(i);
+                /*if(i >= 0) {
+                    sample.adjustPitch(50 + (50 * (i/100)));
+                }
+                else{
+                    sample.adjustPitch(50 / (Math.abs(i/100) + 1));
+                }*/
             }
 
             @Override

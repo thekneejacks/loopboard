@@ -742,7 +742,9 @@ drawable record_button_selected
 drawable record_button_unselected
 drawable rerecord_button
 drawable seek_bar
+drawable seek_bar_pitch
 drawable seek_thumb
+drawable seek_thumb_pitch
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
 id ALT
@@ -853,6 +855,7 @@ id parallax
 id parentPanel
 id parent_matrix
 id pin
+id pitch_slider
 id progress_circular
 id progress_horizontal
 id radio

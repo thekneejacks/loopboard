@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.PlaybackParams;
 import android.util.Log;
 
 import java.io.File;
@@ -20,7 +21,9 @@ class RecordedSample extends Sample {
     private byte[] bytes;
     private AudioTrack audioTrack;
     private int volume;
-    private boolean isMuted = false;
+    private int pitch;
+    private boolean isMuted;
+
 
     /**
      * Open a PCM {@link File} and initialize it to play back. This is the correct way to obtain a
@@ -55,6 +58,8 @@ class RecordedSample extends Sample {
     private RecordedSample(String name) {
         this.name = name;
         this.volume = 100;
+        this.pitch = 44100;
+        this.isMuted = false;
     }
 
     @Override
@@ -64,6 +69,9 @@ class RecordedSample extends Sample {
 
     @Override
     int getVolume() {return volume;}
+
+    @Override
+    int getPitch() { return pitch; }
 
     @Override
     synchronized void play(boolean isLooped) {
@@ -101,6 +109,18 @@ class RecordedSample extends Sample {
         //Log.d("actual volume:",Float.toString(finalvolume));
         audioTrack.setVolume(finalvolume);
     }
+
+    @Override
+    synchronized void adjustPitch(int i) {
+        this.pitch = i;
+        audioTrack.setPlaybackRate(i);
+        /*this.pitch = i;
+        PlaybackParams params = new PlaybackParams();
+        params.setPitch((float) (i / 50.0));
+        params.setSpeed((float) (i / 50.0));
+        audioTrack.setPlaybackParams(params);*/
+    }
+
 
     @Override
     synchronized void mute(boolean x){

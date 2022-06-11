@@ -6,6 +6,8 @@ abstract class Sample {
 
     abstract int getVolume();
 
+    abstract int getPitch();
+
     abstract void play(boolean isLooped);
 
     abstract void stop();
@@ -15,6 +17,8 @@ abstract class Sample {
     abstract void shutdown();
 
     abstract void adjustVolume(int i);
+
+    abstract void adjustPitch(int i);
 
     abstract void mute(boolean x);
 }

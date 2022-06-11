@@ -9,6 +9,7 @@ com/alexkang/loopboard/BuildConfig.java
 com/alexkang/loopboard/SampleListAdapter.java
  com.alexkang.loopboard.SampleListAdapter
  com.alexkang.loopboard.SampleListAdapter$1
+ com.alexkang.loopboard.SampleListAdapter$2
 com/alexkang/loopboard/MainActivity.java
  com.alexkang.loopboard.MainActivity
 com/alexkang/loopboard/Sample.java
