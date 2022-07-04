@@ -22,6 +22,7 @@ class RecordedSample extends Sample {
     private AudioTrack audioTrack;
     private int volume;
     private int pitch;
+    private int play_length;
     private boolean isMuted;
 
 
@@ -59,6 +60,7 @@ class RecordedSample extends Sample {
         this.name = name;
         this.volume = 100;
         this.pitch = 44100;
+        this.play_length = 2;
         this.isMuted = false;
     }
 
@@ -74,6 +76,9 @@ class RecordedSample extends Sample {
     int getPitch() { return pitch; }
 
     @Override
+    int getLength() {return play_length; }
+
+    @Override
     synchronized void play(boolean isLooped) {
         // Stop any ongoing playback.
         audioTrack.stop();
@@ -82,7 +87,8 @@ class RecordedSample extends Sample {
         // Set looping, if needed.
         if (isLooped) {
             // The actual amount of frames in a PCM file is half of the raw byte size.
-            audioTrack.setLoopPoints(0, bytes.length / 2, -1);
+            Log.d("debug length",Integer.toString(this.play_length));
+            audioTrack.setLoopPoints(0, bytes.length / this.play_length, -1);
         } else {
             audioTrack.setLoopPoints(0, 0, 0);
         }
@@ -119,6 +125,12 @@ class RecordedSample extends Sample {
         params.setPitch((float) (i / 50.0));
         params.setSpeed((float) (i / 50.0));
         audioTrack.setPlaybackParams(params);*/
+    }
+
+    @Override
+    synchronized void adjustPlayLength(int i) {
+        this.play_length = i;
+        if(isLooping) play(true);
     }
 
 

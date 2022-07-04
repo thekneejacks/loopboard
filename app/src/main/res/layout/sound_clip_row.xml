@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="75dp">
+    android:layout_height="85dp">
 
     <!--<Button
         android:id="@+id/play"
@@ -40,6 +40,14 @@
             android:layout_weight="1"
             android:progressDrawable="@drawable/seek_bar_pitch"
             android:thumb="@drawable/seek_thumb_pitch"/>
+
+        <SeekBar
+            android:id="@+id/length_slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:progressDrawable="@drawable/seek_bar_length"
+            android:thumb="@drawable/seek_thumb_length"/>
 
 
     </LinearLayout>

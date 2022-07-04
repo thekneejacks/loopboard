@@ -34,6 +34,11 @@ class ImportedSample extends Sample {
     }
 
     @Override
+    int getLength() {
+        return 0;
+    }
+
+    @Override
     synchronized void play(boolean isLooped) {
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer.create(context, Uri.parse(sampleFile.getAbsolutePath()));
@@ -70,6 +75,11 @@ class ImportedSample extends Sample {
 
     @Override
     void adjustPitch(int i) {
+
+    }
+
+    @Override
+    void adjustPlayLength(int i) {
 
     }
 

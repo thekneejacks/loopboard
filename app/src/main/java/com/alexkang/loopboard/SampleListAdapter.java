@@ -75,6 +75,7 @@ public class SampleListAdapter extends BaseAdapter {
         //Button playButton = convertView.findViewById(R.id.play);
         SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
         SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
+        SeekBar lengthSlider = convertView.findViewById(R.id.length_slider);
 
         // Update the state of the loop button.
         loopButton.setChecked(sample.isLooping());
@@ -165,6 +166,26 @@ public class SampleListAdapter extends BaseAdapter {
                 else{
                     sample.adjustPitch(50 / (Math.abs(i/100) + 1));
                 }*/
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        lengthSlider.setMax(100);
+        lengthSlider.setMin(2);
+        lengthSlider.setProgress(sample.getLength());
+        lengthSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
+                sample.adjustPlayLength(i);
             }
 
             @Override
