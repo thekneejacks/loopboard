@@ -19,5 +19,6 @@ com/alexkang/loopboard/SampleListAdapter.java
  com.alexkang.loopboard.SampleListAdapter$4
  com.alexkang.loopboard.SampleListAdapter$5
  com.alexkang.loopboard.SampleListAdapter$6
+ com.alexkang.loopboard.SampleListAdapter$7
 com/alexkang/loopboard/MainActivity.java
  com.alexkang.loopboard.MainActivity

@@ -42,8 +42,6 @@ public class SampleListAdapter extends BaseAdapter {
     }
 
 
-    public void stopRandomizers() { modulationHandler.removeCallbacksAndMessages(null); }
-
     @Override
     public Sample getItem(int position) {
         if (position < importedSamples.size()) {
@@ -81,6 +79,7 @@ public class SampleListAdapter extends BaseAdapter {
         CheckBox muteButton = convertView.findViewById(R.id.mute);
         CheckBox loopButton = convertView.findViewById(R.id.loop);
         CheckBox randomizerButton = convertView.findViewById(R.id.randomizer);
+        CheckBox sineModButton = convertView.findViewById(R.id.sine);
         //Button playButton = convertView.findViewById(R.id.play);
         SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
         SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
@@ -149,16 +148,63 @@ public class SampleListAdapter extends BaseAdapter {
                 int rand = r.nextInt((max - min) + min) + Math.round(min/2);
                 pitchSlider.setProgress(rand);
                 modulationHandler.postDelayed(this, (2000 / intervalModifier));
-                Log.d("repeat: ",Integer.toString(rand) + "/" + Integer.toString(intervalModifier));
+                //Log.d("repeat: ",Integer.toString(rand) + "/" + Integer.toString(intervalModifier));
+            }
+        };
+
+        Runnable sineModTask = new Runnable() {
+            boolean climbing = true;
+            int i = 1;
+            int i2 = 1;
+            @Override
+            public void run() {
+                //int intervalModifier = sample.getRandomizerInterval();
+                int rangeModifier = sample.getRandomizerIntensity();
+                int min = 1 + rangeModifier * 11024 / 2;
+                int max = 88200 - rangeModifier * 11024 / 2;
+                i = pitchSlider.getProgress();
+                //Log.d("sinewave",Integer.toString(i));
+                if(climbing){
+                    if(i >= max - 10){
+                        climbing = false;
+                    }
+                    else{
+                        i2 = i + 2000;
+                        pitchSlider.setProgress(i2);
+                    }
+                }
+                else {
+                    if(i <= min + 10){
+                        climbing = true;
+                    }
+                    else {
+                        i2 = i - 2000;
+                        pitchSlider.setProgress(i2);
+                    }
+                }
+
+                modulationHandler.postDelayed(this, (20));
             }
         };
 
         modulationHandler.removeCallbacksAndMessages(null);
         randomizerButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //sineModButton.setChecked(false);
             if (isChecked) {
                 randomizerTask.run();
             } else {
                 modulationHandler.removeCallbacks(randomizerTask);
+            }
+        });
+
+
+        sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //randomizerButton.setChecked(false);
+            if (isChecked) {
+                pitchSlider.setProgress(44100);
+                sineModTask.run();
+            } else {
+                modulationHandler.removeCallbacks(sineModTask);
             }
         });
 
