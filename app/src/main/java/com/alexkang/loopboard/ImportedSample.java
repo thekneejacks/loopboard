@@ -39,6 +39,16 @@ class ImportedSample extends Sample {
     }
 
     @Override
+    int getRandomizerInterval() {
+        return 0;
+    }
+
+    @Override
+    int getRandomizerIntensity() {
+        return 0;
+    }
+
+    @Override
     synchronized void play(boolean isLooped) {
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer.create(context, Uri.parse(sampleFile.getAbsolutePath()));
@@ -80,6 +90,16 @@ class ImportedSample extends Sample {
 
     @Override
     void adjustPlayLength(int i) {
+
+    }
+
+    @Override
+    void adjustRandomizerInterval(int i) {
+
+    }
+
+    @Override
+    void adjustRandomizerIntensity(int i) {
 
     }
 

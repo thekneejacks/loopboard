@@ -10,6 +10,10 @@ abstract class Sample {
 
     abstract int getLength();
 
+    abstract int getRandomizerInterval();
+
+    abstract int getRandomizerIntensity();
+
     abstract void play(boolean isLooped);
 
     abstract void stop();
@@ -23,6 +27,10 @@ abstract class Sample {
     abstract void adjustPitch(int i);
 
     abstract void adjustPlayLength(int i);
+
+    abstract void adjustRandomizerInterval(int i);
+
+    abstract void adjustRandomizerIntensity(int i);
 
     abstract void mute(boolean x);
 }

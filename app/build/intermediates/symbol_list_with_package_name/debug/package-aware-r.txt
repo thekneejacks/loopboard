@@ -737,14 +737,19 @@ drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
 drawable play_button
+drawable randomize_button
 drawable record_button
 drawable record_button_selected
 drawable record_button_unselected
 drawable rerecord_button
 drawable seek_bar
+drawable seek_bar_length
 drawable seek_bar_pitch
+drawable seek_bar_randomize
 drawable seek_thumb
+drawable seek_thumb_length
 drawable seek_thumb_pitch
+drawable seek_thumb_randomize
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
 id ALT
@@ -833,6 +838,7 @@ id italic
 id item_touch_helper_previous_elevation
 id largeLabel
 id left
+id length_slider
 id line1
 id line3
 id listMode
@@ -860,6 +866,9 @@ id pitch_slider
 id progress_circular
 id progress_horizontal
 id radio
+id randomizer
+id randomizer_intensity_slider
+id randomizer_speed_slider
 id record_button
 id rerecord
 id right
@@ -891,6 +900,7 @@ id shortcut
 id showCustom
 id showHome
 id showTitle
+id sine
 id smallLabel
 id snackbar_action
 id snackbar_text

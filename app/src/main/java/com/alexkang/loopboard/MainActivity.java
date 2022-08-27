@@ -201,7 +201,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshRecordings() {
         shutdownSamples();
-
         // First, add user imported audio files to the top of our sample list. Also, create the
         // LoopBoard directory if it doesn't already exist.
         /*try {
@@ -334,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private void deleteAllRecordings() {
 	    // Stop playing all samples.
-        stopAllSamples();
+        shutdownSamples();
 
         // Delete all recordings.
         for (String fileName : fileList()) {

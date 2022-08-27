@@ -2,21 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="85dp">
-
-    <!--<Button
-        android:id="@+id/play"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="start|center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:background="@drawable/play_button"
-        android:textColor="@color/charcoal"
-        android:singleLine="true"
-        style="?android:buttonBarButtonStyle" />-->
-
+    android:layout_height="146dp">
 
 
     <LinearLayout
@@ -49,6 +35,27 @@
             android:progressDrawable="@drawable/seek_bar_length"
             android:thumb="@drawable/seek_thumb_length"/>
 
+        <SeekBar
+            android:id="@+id/randomizer_speed_slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:progressDrawable="@drawable/seek_bar_randomize"
+            android:thumb="@drawable/seek_thumb_randomize"/>
+
+        <SeekBar
+            android:id="@+id/randomizer_intensity_slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:progressDrawable="@drawable/seek_bar_length"
+            android:thumb="@drawable/seek_thumb_length"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@android:color/darker_gray"/>
+
 
     </LinearLayout>
 
@@ -63,39 +70,88 @@
         android:textStyle="bold"
         android:text="@string/stop"
         style="?android:buttonBarButtonStyle" />-->
-    <CheckBox
-        android:id="@+id/mute"
-        android:layout_width="52dp"
+
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@drawable/mute_button"
-        android:textColor="@android:color/white"
-        android:button="@android:color/transparent"
-        android:textStyle="bold"
-        android:text="MUTE"
-        style="?android:buttonBarButtonStyle" />
+        android:layout_weight="0"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/rerecord"
-        android:layout_width="52dp"
-        android:layout_height="match_parent"
-        android:background="@drawable/rerecord_button"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:text="@string/record"
-        style="?android:buttonBarButtonStyle" />
+        <LinearLayout
+            android:layout_width="156dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
 
-    <CheckBox
-        android:id="@+id/loop"
-        android:layout_width="52dp"
-        android:layout_height="match_parent"
-        android:background="@drawable/loop_button"
-        android:button="@android:color/transparent"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:text="@string/loop"
-        style="?android:buttonBarButtonStyle" />
+                <CheckBox
+                    android:id="@+id/mute"
+                    style="?android:buttonBarButtonStyle"
+                    android:layout_width="52dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/mute_button"
+                    android:button="@android:color/transparent"
+                    android:text="MUTE"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
 
+                <Button
+                    android:id="@+id/rerecord"
+                    android:layout_width="52dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rerecord_button"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:text="@string/record"
+                    style="?android:buttonBarButtonStyle" />
 
+                <CheckBox
+                    android:id="@+id/loop"
+                    android:layout_width="52dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/loop_button"
+                    android:button="@android:color/transparent"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:text="@string/loop"
+                    style="?android:buttonBarButtonStyle" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/randomizer"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="52dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/randomize_button"
+                android:button="@android:color/transparent"
+                android:text="RAND"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/sine"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="52dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/randomize_button"
+                android:button="@android:color/transparent"
+                android:text="SINE"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@android:color/darker_gray"/>
+
+    </LinearLayout>
 
 </LinearLayout>

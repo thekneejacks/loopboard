@@ -2,6 +2,7 @@ package com.alexkang.loopboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.SeekBar;
 
 import java.util.List;
+import java.util.Random;
 
 public class SampleListAdapter extends BaseAdapter {
 
@@ -20,6 +22,8 @@ public class SampleListAdapter extends BaseAdapter {
     private final Recorder recorder;
     private final List<ImportedSample> importedSamples;
     private final List<RecordedSample> recordedSamples;
+    private Handler modulationHandler = new Handler();
+    Random r;
 
     SampleListAdapter(
             Context context,
@@ -37,6 +41,9 @@ public class SampleListAdapter extends BaseAdapter {
         return importedSamples.size() + recordedSamples.size();
     }
 
+
+    public void stopRandomizers() { modulationHandler.removeCallbacksAndMessages(null); }
+
     @Override
     public Sample getItem(int position) {
         if (position < importedSamples.size()) {
@@ -52,6 +59,7 @@ public class SampleListAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
+
 
     @Override
     @SuppressLint("ClickableViewAccessibility")
@@ -72,10 +80,16 @@ public class SampleListAdapter extends BaseAdapter {
         Button rerecordButton = convertView.findViewById(R.id.rerecord);
         CheckBox muteButton = convertView.findViewById(R.id.mute);
         CheckBox loopButton = convertView.findViewById(R.id.loop);
+        CheckBox randomizerButton = convertView.findViewById(R.id.randomizer);
         //Button playButton = convertView.findViewById(R.id.play);
         SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
         SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
         SeekBar lengthSlider = convertView.findViewById(R.id.length_slider);
+        SeekBar randomizerSpeedSlider = convertView.findViewById(R.id.randomizer_speed_slider);
+        SeekBar randomizerIntensitySlider = convertView.findViewById(R.id.randomizer_intensity_slider);
+        //randomizerHandler = new Handler();
+        r = new Random();
+
 
         // Update the state of the loop button.
         loopButton.setChecked(sample.isLooping());
@@ -91,18 +105,9 @@ public class SampleListAdapter extends BaseAdapter {
             rerecordButton.setVisibility(View.VISIBLE);
         }
 
-        // Set button listeners.
-        /*playButton.setText(sample.getName());
-        playButton.setOnClickListener(v -> {
-            if (sample.isLooping()) {
-                loopButton.setChecked(false);
-            }
-            sample.play(false);
-        });*/
-        //stopButton.setOnClickListener(v -> {
-        //    loopButton.setChecked(false);
-        //    sample.stop();
-        //});
+
+        //_____________________________Buttons_____________________________
+
         rerecordButton.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
@@ -133,6 +138,31 @@ public class SampleListAdapter extends BaseAdapter {
                 sample.mute(false);
             }
         });
+
+        Runnable randomizerTask = new Runnable() {
+            @Override
+            public void run() {
+                int intervalModifier = sample.getRandomizerInterval();
+                int rangeModifier = sample.getRandomizerIntensity();
+                int min = 1 + rangeModifier * 11024;
+                int max = 88200 - rangeModifier * 11024;
+                int rand = r.nextInt((max - min) + min) + Math.round(min/2);
+                pitchSlider.setProgress(rand);
+                modulationHandler.postDelayed(this, (2000 / intervalModifier));
+                Log.d("repeat: ",Integer.toString(rand) + "/" + Integer.toString(intervalModifier));
+            }
+        };
+
+        modulationHandler.removeCallbacksAndMessages(null);
+        randomizerButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                randomizerTask.run();
+            } else {
+                modulationHandler.removeCallbacks(randomizerTask);
+            }
+        });
+
+        //_____________________________Sliders_____________________________
 
         volumeSlider.setMax(100);
         volumeSlider.setProgress(sample.getVolume());
@@ -199,6 +229,45 @@ public class SampleListAdapter extends BaseAdapter {
             }
         });
 
+        randomizerSpeedSlider.setMax(100);
+        randomizerSpeedSlider.setMin(1);
+        randomizerSpeedSlider.setProgress(sample.getRandomizerInterval());
+        randomizerSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
+                sample.adjustRandomizerInterval(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        randomizerIntensitySlider.setMax(5);
+        randomizerIntensitySlider.setMin(1);
+        randomizerIntensitySlider.setProgress(sample.getRandomizerIntensity());
+        randomizerIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
+                sample.adjustRandomizerIntensity(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         return convertView;
     }

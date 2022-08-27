@@ -24,6 +24,8 @@ class RecordedSample extends Sample {
     private int pitch;
     private int play_length;
     private boolean isMuted;
+    private int randomizerInterval;
+    private int randomizerIntensity;
 
 
     /**
@@ -62,6 +64,8 @@ class RecordedSample extends Sample {
         this.pitch = 44100;
         this.play_length = 2;
         this.isMuted = false;
+        this.randomizerInterval = 1;
+        this.randomizerIntensity = 1;
     }
 
     @Override
@@ -77,6 +81,12 @@ class RecordedSample extends Sample {
 
     @Override
     int getLength() {return play_length; }
+
+    @Override
+    int getRandomizerInterval() {return randomizerInterval; }
+
+    @Override
+    int getRandomizerIntensity() {return randomizerIntensity; }
 
     @Override
     synchronized void play(boolean isLooped) {
@@ -142,6 +152,16 @@ class RecordedSample extends Sample {
             float finalvolume = (float) (this.volume / 100.0);
             audioTrack.setVolume(finalvolume);
         }
+    }
+
+    @Override
+    synchronized void adjustRandomizerInterval(int i) {
+        this.randomizerInterval = i;
+    }
+
+    @Override
+    synchronized void adjustRandomizerIntensity(int i) {
+        this.randomizerIntensity = i;
     }
 
     @Override

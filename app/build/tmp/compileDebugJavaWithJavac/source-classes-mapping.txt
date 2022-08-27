@@ -6,14 +6,18 @@ com/alexkang/loopboard/Utils.java
  com.alexkang.loopboard.Utils
 com/alexkang/loopboard/BuildConfig.java
  com.alexkang.loopboard.BuildConfig
-com/alexkang/loopboard/Sample.java
- com.alexkang.loopboard.Sample
 com/alexkang/loopboard/Recorder.java
  com.alexkang.loopboard.Recorder
  com.alexkang.loopboard.Recorder$RecorderCallback
+com/alexkang/loopboard/Sample.java
+ com.alexkang.loopboard.Sample
 com/alexkang/loopboard/SampleListAdapter.java
  com.alexkang.loopboard.SampleListAdapter
  com.alexkang.loopboard.SampleListAdapter$1
  com.alexkang.loopboard.SampleListAdapter$2
+ com.alexkang.loopboard.SampleListAdapter$3
+ com.alexkang.loopboard.SampleListAdapter$4
+ com.alexkang.loopboard.SampleListAdapter$5
+ com.alexkang.loopboard.SampleListAdapter$6
 com/alexkang/loopboard/MainActivity.java
  com.alexkang.loopboard.MainActivity
