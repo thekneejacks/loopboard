@@ -1,4 +1,4 @@
-#Sat Aug 27 13:51:29 KST 2022
+#Wed Oct 12 22:34:23 KST 2022
 base.2=C\:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\3\\classes.dex
 path.2=3/classes.dex
 base.1=C\:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex

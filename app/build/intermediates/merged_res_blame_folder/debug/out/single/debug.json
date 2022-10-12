@@ -1,11 +1,11 @@
 [
     {
-        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_ic_action_stop.png.flat",
-        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xhdpi\\ic_action_stop.png"
-    },
-    {
         "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_rerecord_button.xml.flat",
         "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable\\rerecord_button.xml"
+    },
+    {
+        "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_ic_action_stop.png.flat",
+        "source": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\src\\main\\res\\drawable-xhdpi\\ic_action_stop.png"
     },
     {
         "merged": "C:\\Users\\wohnton\\Documents\\GitHub\\loopboard\\app\\build\\intermediates\\res\\merged\\debug\\drawable_loop_button.xml.flat",
