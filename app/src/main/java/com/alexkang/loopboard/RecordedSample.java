@@ -5,13 +5,14 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.media.PlaybackParams;
+import android.os.Handler;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Random;
 
 class RecordedSample extends Sample {
 
@@ -26,6 +27,8 @@ class RecordedSample extends Sample {
     private boolean isMuted;
     private int randomizerInterval;
     private int randomizerIntensity;
+    private final Handler modulationHandler = new Handler();
+    Random r = new Random();
 
 
     /**
@@ -165,12 +168,30 @@ class RecordedSample extends Sample {
     }
 
     @Override
+    synchronized void startRandomizer() {
+        randomizerTask.run();
+    }
+
+    @Override
+    synchronized void startSineMod() {
+        sineModTask.run();
+    }
+
+
+    @Override
+    synchronized void removeModulationCallbacks(int i) {
+        if(i == 0) modulationHandler.removeCallbacks(randomizerTask);
+        else modulationHandler.removeCallbacks(sineModTask);
+    }
+
+    @Override
     synchronized boolean isLooping() {
         return isLooping;
     }
 
     @Override
     synchronized void shutdown() {
+        modulationHandler.removeCallbacksAndMessages(null);
         audioTrack.release();
     }
 
@@ -203,4 +224,58 @@ class RecordedSample extends Sample {
         // Write the audio bytes to the audioTrack to play back.
         audioTrack.write(bytes, 0, bytes.length);
     }
+
+
+
+    Runnable randomizerTask = new Runnable() {
+        @Override
+        public void run() {
+            int intervalModifier = randomizerInterval;
+            int rangeModifier = randomizerIntensity;
+            int min = 1 + rangeModifier * 11024;
+            int max = 88200 - rangeModifier * 11024;
+            int rand = r.nextInt((max - min) + min) + Math.round(min/2);
+            //pitchSlider.setProgress(rand);
+            adjustPitch(rand);
+            modulationHandler.postDelayed(this, (2000 / intervalModifier));
+            //Log.d("repeat: ",Integer.toString(rand) + "/" + Integer.toString(intervalModifier));
+        }
+    };
+
+    Runnable sineModTask = new Runnable() {
+        boolean climbing = true;
+        int i = 1;
+        int i2 = 1;
+        @Override
+        public void run() {
+            //int intervalModifier = sample.getRandomizerInterval();
+            int rangeModifier = randomizerIntensity;
+            int min = 1 + rangeModifier * 11024 / 2;
+            int max = 88200 - rangeModifier * 11024 / 2;
+            i = pitch;
+            //Log.d("sinewave",Integer.toString(i));
+            if(climbing){
+                if(i >= max - 10){
+                    climbing = false;
+                }
+                else{
+                    i2 = i + 2000;
+                    //pitchSlider.setProgress(i2);
+                    adjustPitch(i2);
+                }
+            }
+            else {
+                if(i <= min + 10){
+                    climbing = true;
+                }
+                else {
+                    i2 = i - 2000;
+                    //pitchSlider.setProgress(i2);
+                    adjustPitch(i2);
+                }
+            }
+
+            modulationHandler.postDelayed(this, (20));
+        }
+    };
 }

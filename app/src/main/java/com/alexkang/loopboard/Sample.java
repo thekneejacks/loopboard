@@ -1,5 +1,6 @@
 package com.alexkang.loopboard;
 
+
 abstract class Sample {
 
     abstract String getName();
@@ -17,6 +18,12 @@ abstract class Sample {
     abstract void play(boolean isLooped);
 
     abstract void stop();
+
+    abstract void startRandomizer();
+
+    abstract void startSineMod();
+
+    abstract void removeModulationCallbacks(int i);
 
     abstract boolean isLooping();
 

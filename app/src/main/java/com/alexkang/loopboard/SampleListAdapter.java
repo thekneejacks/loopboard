@@ -2,6 +2,7 @@ package com.alexkang.loopboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +23,7 @@ public class SampleListAdapter extends BaseAdapter {
     private final Recorder recorder;
     private final List<ImportedSample> importedSamples;
     private final List<RecordedSample> recordedSamples;
-    private Handler modulationHandler = new Handler();
+
     Random r;
 
     SampleListAdapter(
@@ -138,62 +139,18 @@ public class SampleListAdapter extends BaseAdapter {
             }
         });
 
-        Runnable randomizerTask = new Runnable() {
-            @Override
-            public void run() {
-                int intervalModifier = sample.getRandomizerInterval();
-                int rangeModifier = sample.getRandomizerIntensity();
-                int min = 1 + rangeModifier * 11024;
-                int max = 88200 - rangeModifier * 11024;
-                int rand = r.nextInt((max - min) + min) + Math.round(min/2);
-                pitchSlider.setProgress(rand);
-                modulationHandler.postDelayed(this, (2000 / intervalModifier));
-                //Log.d("repeat: ",Integer.toString(rand) + "/" + Integer.toString(intervalModifier));
-            }
-        };
 
-        Runnable sineModTask = new Runnable() {
-            boolean climbing = true;
-            int i = 1;
-            int i2 = 1;
-            @Override
-            public void run() {
-                //int intervalModifier = sample.getRandomizerInterval();
-                int rangeModifier = sample.getRandomizerIntensity();
-                int min = 1 + rangeModifier * 11024 / 2;
-                int max = 88200 - rangeModifier * 11024 / 2;
-                i = pitchSlider.getProgress();
-                //Log.d("sinewave",Integer.toString(i));
-                if(climbing){
-                    if(i >= max - 10){
-                        climbing = false;
-                    }
-                    else{
-                        i2 = i + 2000;
-                        pitchSlider.setProgress(i2);
-                    }
-                }
-                else {
-                    if(i <= min + 10){
-                        climbing = true;
-                    }
-                    else {
-                        i2 = i - 2000;
-                        pitchSlider.setProgress(i2);
-                    }
-                }
 
-                modulationHandler.postDelayed(this, (20));
-            }
-        };
 
-        modulationHandler.removeCallbacksAndMessages(null);
+
+        //sample.removeModulationCallbacks(2);
         randomizerButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             //sineModButton.setChecked(false);
             if (isChecked) {
-                randomizerTask.run();
+                sample.startRandomizer();
             } else {
-                modulationHandler.removeCallbacks(randomizerTask);
+                sample.removeModulationCallbacks(0);
+                sample.adjustPitch(pitchSlider.getProgress());
             }
         });
 
@@ -201,10 +158,11 @@ public class SampleListAdapter extends BaseAdapter {
         sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             //randomizerButton.setChecked(false);
             if (isChecked) {
-                pitchSlider.setProgress(44100);
-                sineModTask.run();
+                //pitchSlider.setProgress(44100);
+                sample.startSineMod();
             } else {
-                modulationHandler.removeCallbacks(sineModTask);
+                sample.removeModulationCallbacks(1);
+                sample.adjustPitch(pitchSlider.getProgress());
             }
         });
 
@@ -230,7 +188,9 @@ public class SampleListAdapter extends BaseAdapter {
         });
 
         pitchSlider.setMax(88200);
-        pitchSlider.setMin(1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pitchSlider.setMin(1);
+        }
         pitchSlider.setProgress(sample.getPitch());
         pitchSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -256,7 +216,9 @@ public class SampleListAdapter extends BaseAdapter {
         });
 
         lengthSlider.setMax(100);
-        lengthSlider.setMin(2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            lengthSlider.setMin(2);
+        }
         lengthSlider.setProgress(sample.getLength());
         lengthSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -276,7 +238,9 @@ public class SampleListAdapter extends BaseAdapter {
         });
 
         randomizerSpeedSlider.setMax(100);
-        randomizerSpeedSlider.setMin(1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            randomizerSpeedSlider.setMin(1);
+        }
         randomizerSpeedSlider.setProgress(sample.getRandomizerInterval());
         randomizerSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -296,7 +260,9 @@ public class SampleListAdapter extends BaseAdapter {
         });
 
         randomizerIntensitySlider.setMax(5);
-        randomizerIntensitySlider.setMin(1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            randomizerIntensitySlider.setMin(1);
+        }
         randomizerIntensitySlider.setProgress(sample.getRandomizerIntensity());
         randomizerIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

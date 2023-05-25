@@ -78,6 +78,21 @@ class ImportedSample extends Sample {
     }
 
     @Override
+    void startRandomizer() {
+
+    }
+
+    @Override
+    void startSineMod() {
+
+    }
+
+    @Override
+    void removeModulationCallbacks(int i) {
+
+    }
+
+    @Override
     synchronized void adjustVolume(int targetVolume) {
         float log1 = (float)(Math.log(50-targetVolume)/Math.log(50));
         mediaPlayer.setVolume(log1,log1);
