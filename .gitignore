@@ -1,0 +1,7 @@
+
+*.lock
+*.bin
+*.iml
+*.gradle
+*.json
+*.dex
