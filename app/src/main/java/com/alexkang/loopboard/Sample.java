@@ -23,6 +23,8 @@ abstract class Sample {
 
     abstract void startSineMod();
 
+    abstract void startSawMod();
+
     abstract void removeModulationCallbacks(int i);
 
     abstract boolean isLooping();

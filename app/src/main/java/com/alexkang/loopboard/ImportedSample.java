@@ -88,6 +88,11 @@ class ImportedSample extends Sample {
     }
 
     @Override
+    void startSawMod() {
+
+    }
+
+    @Override
     void removeModulationCallbacks(int i) {
 
     }

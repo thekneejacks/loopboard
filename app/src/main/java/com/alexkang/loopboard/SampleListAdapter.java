@@ -81,6 +81,7 @@ public class SampleListAdapter extends BaseAdapter {
         CheckBox loopButton = convertView.findViewById(R.id.loop);
         CheckBox randomizerButton = convertView.findViewById(R.id.randomizer);
         CheckBox sineModButton = convertView.findViewById(R.id.sine);
+        CheckBox sawModButton = convertView.findViewById(R.id.saw);
         //Button playButton = convertView.findViewById(R.id.play);
         SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
         SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
@@ -162,6 +163,17 @@ public class SampleListAdapter extends BaseAdapter {
                 sample.startSineMod();
             } else {
                 sample.removeModulationCallbacks(1);
+                sample.adjustPitch(pitchSlider.getProgress());
+            }
+        });
+
+        sawModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //randomizerButton.setChecked(false);
+            if (isChecked) {
+                //pitchSlider.setProgress(44100);
+                sample.startSawMod();
+            } else {
+                sample.removeModulationCallbacks(2);
                 sample.adjustPitch(pitchSlider.getProgress());
             }
         });

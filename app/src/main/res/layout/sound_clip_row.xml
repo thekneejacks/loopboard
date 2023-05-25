@@ -145,6 +145,17 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
+            <CheckBox
+                android:id="@+id/saw"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="52dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/randomize_button"
+                android:button="@android:color/transparent"
+                android:text="SAW"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
         <View

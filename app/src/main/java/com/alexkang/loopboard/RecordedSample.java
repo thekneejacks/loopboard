@@ -177,11 +177,25 @@ class RecordedSample extends Sample {
         sineModTask.run();
     }
 
+    @Override
+    synchronized void startSawMod() {
+        sawModTask.run();
+    }
+
 
     @Override
     synchronized void removeModulationCallbacks(int i) {
-        if(i == 0) modulationHandler.removeCallbacks(randomizerTask);
-        else modulationHandler.removeCallbacks(sineModTask);
+        switch (i){
+            case 0:
+                modulationHandler.removeCallbacks(randomizerTask);
+                break;
+            case 1:
+                modulationHandler.removeCallbacks(sineModTask);
+                break;
+            default:
+                modulationHandler.removeCallbacks(sawModTask);
+                break;
+        }
     }
 
     @Override
@@ -244,16 +258,15 @@ class RecordedSample extends Sample {
 
     Runnable sineModTask = new Runnable() {
         boolean climbing = true;
-        int i = 1;
-        int i2 = 1;
         @Override
         public void run() {
             //int intervalModifier = sample.getRandomizerInterval();
             int rangeModifier = randomizerIntensity;
             int min = 1 + rangeModifier * 11024 / 2;
             int max = 88200 - rangeModifier * 11024 / 2;
-            i = pitch;
+            int i = pitch;
             //Log.d("sinewave",Integer.toString(i));
+            int i2;
             if(climbing){
                 if(i >= max - 10){
                     climbing = false;
@@ -274,6 +287,28 @@ class RecordedSample extends Sample {
                     adjustPitch(i2);
                 }
             }
+
+            modulationHandler.postDelayed(this, (20));
+        }
+    };
+
+    Runnable sawModTask = new Runnable() {
+        @Override
+        public void run() {
+            int intervalModifier = randomizerInterval;
+            int rangeModifier = randomizerIntensity;
+            int min = 1 + (rangeModifier * 11024 / 2);
+            int max = 88200 - (rangeModifier * 11024 / 2);
+            int i = pitch;
+            int i2;
+
+            if(i >= max - 10){
+                i2 = min;
+            }
+            else{
+                i2 = i + 100 * intervalModifier;
+            }
+            adjustPitch(i2);
 
             modulationHandler.postDelayed(this, (20));
         }

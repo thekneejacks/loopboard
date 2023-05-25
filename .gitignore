@@ -5,3 +5,7 @@
 *.gradle
 *.json
 *.dex
+*.txt
+*.apk
+*.class
+*.xml
