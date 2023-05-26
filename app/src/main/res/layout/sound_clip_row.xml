@@ -94,11 +94,12 @@
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
 
-                <Button
+                <CheckBox
                     android:id="@+id/rerecord"
                     android:layout_width="52dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/rerecord_button"
+                    android:button="@android:color/transparent"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"
                     android:text="@string/record"

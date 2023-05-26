@@ -210,6 +210,7 @@ class RecordedSample extends Sample {
 
     /** Update a recorded sample and save it to disk. */
     synchronized void save(Context context, byte[] bytes) {
+        this.stop();
         loadNewSample(bytes);
         Utils.saveRecording(context, name, bytes);
     }

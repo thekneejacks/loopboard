@@ -76,7 +76,7 @@ public class SampleListAdapter extends BaseAdapter {
         }
 
         //Button stopButton = convertView.findViewById(R.id.stop);
-        Button rerecordButton = convertView.findViewById(R.id.rerecord);
+        CheckBox rerecordButton = convertView.findViewById(R.id.rerecord);
         CheckBox octaveButton = convertView.findViewById(R.id.octave);
         CheckBox loopButton = convertView.findViewById(R.id.loop);
         CheckBox randomizerButton = convertView.findViewById(R.id.randomizer);
@@ -109,7 +109,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         //_____________________________Buttons_____________________________
 
-        rerecordButton.setOnTouchListener((view, motionEvent) -> {
+        /*rerecordButton.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
                 view.setPressed(true);
@@ -121,7 +121,21 @@ public class SampleListAdapter extends BaseAdapter {
                 loopButton.setChecked(false);
             }
             return true;
+        });*/
+        rerecordButton.setChecked(false);
+        rerecordButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                recorder.startRecording(
+                        recordedBytes -> {
+                            assert sample instanceof RecordedSample;
+                            ((RecordedSample) sample).save(context, recordedBytes);
+                        });
+            } else {
+                recorder.stopRecording();
+                loopButton.setChecked(false);
+            }
         });
+
         loopButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sample.adjustVolume(volumeSlider.getProgress());
             sample.adjustPitch(pitchSlider.getProgress());
