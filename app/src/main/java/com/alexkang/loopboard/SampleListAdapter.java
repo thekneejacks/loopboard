@@ -77,7 +77,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         //Button stopButton = convertView.findViewById(R.id.stop);
         Button rerecordButton = convertView.findViewById(R.id.rerecord);
-        CheckBox muteButton = convertView.findViewById(R.id.mute);
+        CheckBox octaveButton = convertView.findViewById(R.id.octave);
         CheckBox loopButton = convertView.findViewById(R.id.loop);
         CheckBox randomizerButton = convertView.findViewById(R.id.randomizer);
         CheckBox sineModButton = convertView.findViewById(R.id.sine);
@@ -132,14 +132,21 @@ public class SampleListAdapter extends BaseAdapter {
             }
         });
 
-        muteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        /*muteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 sample.mute(true);
             } else {
                 sample.mute(false);
             }
-        });
+        });*/
 
+        octaveButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                sample.setHighOctave(true);
+            } else {
+                sample.setHighOctave(false);
+            }
+        });
 
 
 
@@ -273,7 +280,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         randomizerIntensitySlider.setMax(5);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            randomizerIntensitySlider.setMin(1);
+            randomizerIntensitySlider.setMin(0);
         }
         randomizerIntensitySlider.setProgress(sample.getRandomizerIntensity());
         randomizerIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

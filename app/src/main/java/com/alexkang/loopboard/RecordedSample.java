@@ -24,7 +24,8 @@ class RecordedSample extends Sample {
     private int volume;
     private int pitch;
     private int play_length;
-    private boolean isMuted;
+
+    private boolean highOctave;
     private int randomizerInterval;
     private int randomizerIntensity;
     private final Handler modulationHandler = new Handler();
@@ -66,9 +67,9 @@ class RecordedSample extends Sample {
         this.volume = 100;
         this.pitch = 44100;
         this.play_length = 2;
-        this.isMuted = false;
+        this.highOctave = false;
         this.randomizerInterval = 1;
-        this.randomizerIntensity = 1;
+        this.randomizerIntensity = 0;
     }
 
     @Override
@@ -122,7 +123,7 @@ class RecordedSample extends Sample {
     @Override
     synchronized void adjustVolume(int targetVolume) {
         this.volume = targetVolume;
-        if(this.isMuted) return;
+        //if(this.isMuted) return;
 
         float finalvolume = (float) (targetVolume / 100.0);
         //Log.d("actual volume:",Float.toString(finalvolume));
@@ -132,7 +133,8 @@ class RecordedSample extends Sample {
     @Override
     synchronized void adjustPitch(int i) {
         this.pitch = i;
-        audioTrack.setPlaybackRate(i);
+        if(this.highOctave) audioTrack.setPlaybackRate(i*2);
+        else audioTrack.setPlaybackRate(i);
         /*this.pitch = i;
         PlaybackParams params = new PlaybackParams();
         params.setPitch((float) (i / 50.0));
@@ -146,15 +148,12 @@ class RecordedSample extends Sample {
         if(isLooping) play(true);
     }
 
-
     @Override
-    synchronized void mute(boolean x){
-        this.isMuted = x;
-        if(x) audioTrack.setVolume(0);
-        else {
-            float finalvolume = (float) (this.volume / 100.0);
-            audioTrack.setVolume(finalvolume);
-        }
+    synchronized void setHighOctave(boolean x){
+        this.highOctave = x;
+        int i = this.pitch;
+        if(x) audioTrack.setPlaybackRate(i*2);
+        else audioTrack.setPlaybackRate(i);
     }
 
     @Override
@@ -246,8 +245,8 @@ class RecordedSample extends Sample {
         public void run() {
             int intervalModifier = randomizerInterval;
             int rangeModifier = randomizerIntensity;
-            int min = 1 + rangeModifier * 11024;
-            int max = 88200 - rangeModifier * 11024;
+            int min = 1 + rangeModifier * 5512;
+            int max = 88200 - rangeModifier * 5512;
             int rand = r.nextInt((max - min) + min) + Math.round(min/2);
             //pitchSlider.setProgress(rand);
             adjustPitch(rand);
@@ -260,10 +259,10 @@ class RecordedSample extends Sample {
         boolean climbing = true;
         @Override
         public void run() {
-            //int intervalModifier = sample.getRandomizerInterval();
+            int intervalModifier = randomizerInterval;
             int rangeModifier = randomizerIntensity;
-            int min = 1 + rangeModifier * 11024 / 2;
-            int max = 88200 - rangeModifier * 11024 / 2;
+            int min = 5512 + rangeModifier * 5512;
+            int max = 88200 - rangeModifier * 5512;
             int i = pitch;
             //Log.d("sinewave",Integer.toString(i));
             int i2;
@@ -272,7 +271,7 @@ class RecordedSample extends Sample {
                     climbing = false;
                 }
                 else{
-                    i2 = i + 2000;
+                    i2 = i + 100 * intervalModifier;
                     //pitchSlider.setProgress(i2);
                     adjustPitch(i2);
                 }
@@ -282,7 +281,7 @@ class RecordedSample extends Sample {
                     climbing = true;
                 }
                 else {
-                    i2 = i - 2000;
+                    i2 = i - 100 * intervalModifier;
                     //pitchSlider.setProgress(i2);
                     adjustPitch(i2);
                 }
@@ -297,8 +296,8 @@ class RecordedSample extends Sample {
         public void run() {
             int intervalModifier = randomizerInterval;
             int rangeModifier = randomizerIntensity;
-            int min = 1 + (rangeModifier * 11024 / 2);
-            int max = 88200 - (rangeModifier * 11024 / 2);
+            int min = 5512 + (rangeModifier * 5512);
+            int max = 88200 - (rangeModifier * 5512);
             int i = pitch;
             int i2;
 

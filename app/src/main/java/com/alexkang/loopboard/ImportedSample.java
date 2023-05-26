@@ -114,6 +114,11 @@ class ImportedSample extends Sample {
     }
 
     @Override
+    void setHighOctave(boolean x) {
+
+    }
+
+    @Override
     void adjustRandomizerInterval(int i) {
 
     }
@@ -123,10 +128,6 @@ class ImportedSample extends Sample {
 
     }
 
-    @Override
-    void mute(boolean x) {
-
-    }
 
     @Override
     synchronized boolean isLooping() {

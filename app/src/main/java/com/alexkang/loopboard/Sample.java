@@ -37,9 +37,9 @@ abstract class Sample {
 
     abstract void adjustPlayLength(int i);
 
+    abstract void setHighOctave(boolean x);
+
     abstract void adjustRandomizerInterval(int i);
 
     abstract void adjustRandomizerIntensity(int i);
-
-    abstract void mute(boolean x);
 }

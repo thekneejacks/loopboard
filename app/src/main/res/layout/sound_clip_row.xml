@@ -84,13 +84,13 @@
             android:orientation="horizontal">
 
                 <CheckBox
-                    android:id="@+id/mute"
+                    android:id="@+id/octave"
                     style="?android:buttonBarButtonStyle"
                     android:layout_width="52dp"
                     android:layout_height="match_parent"
                     android:background="@drawable/mute_button"
                     android:button="@android:color/transparent"
-                    android:text="MUTE"
+                    android:text="OCTA"
                     android:textColor="@android:color/white"
                     android:textStyle="bold" />
 
