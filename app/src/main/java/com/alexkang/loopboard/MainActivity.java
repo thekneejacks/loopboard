@@ -37,13 +37,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 0;
     private static final int FOOTER_SIZE_DP = 360;
     private static final String[] PERMISSIONS =
-            {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            {Manifest.permission.RECORD_AUDIO};
 
-    private final ArrayList<ImportedSample> importedSamples = new ArrayList<>();
+    //private final ArrayList<ImportedSample> importedSamples = new ArrayList<>();
     private final ArrayList<RecordedSample> recordedSamples = new ArrayList<>();
     private final Recorder recorder = new Recorder();
     private final SampleListAdapter sampleListAdapter =
-            new SampleListAdapter(this, recorder, importedSamples, recordedSamples);
+            new SampleListAdapter(this, recorder, recordedSamples);
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
 
     // ------- Activity lifecycle methods -------
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 view.setPressed(true);
 
                 // Make sure we haven't hit our maximum number of recordings before proceeding.
-                if (importedSamples.size() + recordedSamples.size() > Utils.MAX_SAMPLES) {
+                if (recordedSamples.size() > Utils.MAX_SAMPLES) {
                     Snackbar.make(
                             findViewById(R.id.root_layout),
                             R.string.error_max_samples,
@@ -191,7 +191,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateTutorialVisibility() {
-        if (importedSamples.size() > 0 || recordedSamples.size() > 0) {
+        //if (importedSamples.size() > 0 || recordedSamples.size() > 0)
+        if (recordedSamples.size() > 0) {
             // If any samples already exist, remove the tutorial text.
             findViewById(R.id.tutorial).setVisibility(View.GONE);
         } else {
@@ -294,9 +295,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopAllSamples() {
-        for (Sample sample : importedSamples) {
+        /*for (Sample sample : importedSamples) {
             sample.stop();
-        }
+        }*/
         for (Sample sample : recordedSamples) {
             sample.stop();
         }
@@ -319,15 +320,15 @@ public class MainActivity extends AppCompatActivity {
         stopAllSamples();
 
         // Call shutdown on each sample.
-        for (Sample sample : importedSamples) {
+        /*for (Sample sample : importedSamples) {
             sample.shutdown();
-        }
+        }*/
         for (Sample sample : recordedSamples) {
             sample.shutdown();
         }
 
         // Clear the lists.
-        importedSamples.clear();
+        //importedSamples.clear();
         recordedSamples.clear();
     }
 

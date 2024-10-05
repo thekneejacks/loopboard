@@ -21,7 +21,7 @@ public class SampleListAdapter extends BaseAdapter {
 
     private final Context context;
     private final Recorder recorder;
-    private final List<ImportedSample> importedSamples;
+    //private final List<ImportedSample> importedSamples;
     private final List<RecordedSample> recordedSamples;
 
     Random r;
@@ -29,26 +29,30 @@ public class SampleListAdapter extends BaseAdapter {
     SampleListAdapter(
             Context context,
             Recorder recorder,
-            List<ImportedSample> importedSamples,
+            //List<ImportedSample> importedSamples,
             List<RecordedSample> recordedSamples) {
         this.context = context;
         this.recorder = recorder;
-        this.importedSamples = importedSamples;
+        //this.importedSamples = importedSamples;
         this.recordedSamples = recordedSamples;
     }
 
     @Override
-    public int getCount() {
-        return importedSamples.size() + recordedSamples.size();
-    }
+    //public int getCount() {return importedSamples.size() + recordedSamples.size();}
+    public int getCount() { return recordedSamples.size(); }
 
 
     @Override
     public Sample getItem(int position) {
-        if (position < importedSamples.size()) {
+        /*if (position < importedSamples.size()) {
             return importedSamples.get(position);
         } else if (position - importedSamples.size() < recordedSamples.size()) {
             return recordedSamples.get(position - importedSamples.size());
+        } else {
+            return null;
+        }*/
+        if (position < recordedSamples.size()) {
+            return recordedSamples.get(position);
         } else {
             return null;
         }
@@ -96,7 +100,8 @@ public class SampleListAdapter extends BaseAdapter {
         loopButton.setChecked(sample.isLooping());
 
         // Choose which buttons to show.
-        if (sample instanceof ImportedSample) {
+        rerecordButton.setVisibility(View.VISIBLE);
+        /*if (sample instanceof ImportedSample) {
             // Show the stop button and hide the rerecord button.
             //stopButton.setVisibility(View.VISIBLE);
             rerecordButton.setVisibility(View.GONE);
@@ -104,7 +109,7 @@ public class SampleListAdapter extends BaseAdapter {
             // Hide the stop button and show the rerecord button.
             //stopButton.setVisibility(View.GONE);
             rerecordButton.setVisibility(View.VISIBLE);
-        }
+        }*/
 
 
         //_____________________________Buttons_____________________________
