@@ -11,3 +11,6 @@
 *.xml
 *.jar
 *.flat
+/.gradle
+/.idea
+/app/build
