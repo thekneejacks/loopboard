@@ -217,7 +217,8 @@ public class SampleListAdapter extends BaseAdapter {
         pitchSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                sample.adjustPitch(i);
+                //workaround for old devices
+                if(i >= PITCH_SLIDER_MIN) sample.adjustPitch(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -227,7 +228,7 @@ public class SampleListAdapter extends BaseAdapter {
         lengthSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                sample.adjustPlayLength(i);
+                if(i >= PLAY_LENGTH_SLIDER_MIN) sample.adjustPlayLength(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -236,8 +237,8 @@ public class SampleListAdapter extends BaseAdapter {
         //Pitch Modulation Speed Slider
         randomizerSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
-                sample.setModulatorSpeed(i);
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if(i >= RANDOMIZER_SPEED_SLIDER_MIN) sample.setModulatorSpeed(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -247,8 +248,8 @@ public class SampleListAdapter extends BaseAdapter {
         //Pitch Modulation "Intensity" Slider. limits how high / low the modulator can set the sample's pitch value.
         randomizerIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
-                sample.setModulatorIntensity(i);
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if(i >= RANDOMIZER_INTENSITY_SLIDER_MIN) sample.setModulatorIntensity(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
