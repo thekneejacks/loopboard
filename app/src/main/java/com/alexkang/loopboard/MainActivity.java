@@ -18,16 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -300,6 +296,9 @@ public class MainActivity extends AppCompatActivity {
         }*/
         for (Sample sample : recordedSamples) {
             sample.stop();
+            sample.stopRandomMod();
+            sample.stopSineMod();
+            sample.stopSawMod();
         }
 
         // Refresh the list to update button states.

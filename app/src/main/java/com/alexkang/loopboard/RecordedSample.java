@@ -18,16 +18,18 @@ class RecordedSample extends Sample {
 
     private static final String TAG = "RecordedSample";
     private final String name;
-    private boolean isLooping;
     private byte[] bytes;
     private AudioTrack audioTrack;
     private int volume;
     private int pitch;
     private int play_length;
-
-    private boolean highOctave;
-    private int randomizerInterval;
-    private int randomizerIntensity;
+    private int modulatorSpeed;
+    private int modulatorIntensity;
+    private boolean isLooping;
+    private boolean isHighOctave;
+    private boolean isModulatingRandom;
+    private boolean isModulatingSine;
+    private boolean isModulatingSaw;
     private final Handler modulationHandler = new Handler();
     Random r = new Random();
 
@@ -67,30 +69,43 @@ class RecordedSample extends Sample {
         this.volume = 100;
         this.pitch = 44100;
         this.play_length = 2;
-        this.highOctave = false;
-        this.randomizerInterval = 1;
-        this.randomizerIntensity = 0;
+        this.modulatorSpeed = 1;
+        this.modulatorIntensity = 0;
     }
 
-    @Override
-    String getName() {
+    @Override String getName() {
         return name;
     }
 
-    @Override
-    int getVolume() {return volume;}
+    @Override int getVolume() {return volume;}
 
-    @Override
-    int getPitch() { return pitch; }
+    @Override int getPitch() { return pitch; }
 
-    @Override
-    int getLength() {return play_length; }
+    @Override int getLength() {return play_length; }
 
-    @Override
-    int getRandomizerInterval() {return randomizerInterval; }
+    @Override int getModulatorSpeed() {return modulatorSpeed; }
 
-    @Override
-    int getRandomizerIntensity() {return randomizerIntensity; }
+    @Override int getModulatorIntensity() {return modulatorIntensity; }
+
+    @Override boolean isLooping() {
+        return isLooping;
+    }
+
+    @Override boolean isHighOctave() {
+        return isHighOctave;
+    }
+
+    @Override boolean isModulatingRandom() {
+        return isModulatingRandom;
+    }
+
+    @Override boolean isModulatingSine() {
+        return isModulatingSine;
+    }
+
+    @Override boolean isModulatingSaw() {
+        return isModulatingSaw;
+    }
 
     @Override
     synchronized void play(boolean isLooped) {
@@ -133,7 +148,7 @@ class RecordedSample extends Sample {
     @Override
     synchronized void adjustPitch(int i) {
         this.pitch = i;
-        if(this.highOctave) audioTrack.setPlaybackRate(i*2);
+        if(this.isHighOctave) audioTrack.setPlaybackRate(i*2);
         else audioTrack.setPlaybackRate(i);
         /*this.pitch = i;
         PlaybackParams params = new PlaybackParams();
@@ -150,61 +165,153 @@ class RecordedSample extends Sample {
 
     @Override
     synchronized void setHighOctave(boolean x){
-        this.highOctave = x;
+        this.isHighOctave = x;
         int i = this.pitch;
         if(x) audioTrack.setPlaybackRate(i*2);
         else audioTrack.setPlaybackRate(i);
     }
 
     @Override
-    synchronized void adjustRandomizerInterval(int i) {
-        this.randomizerInterval = i;
-    }
+    synchronized void setModulatorSpeed(int i) { this.modulatorSpeed = i; }
 
     @Override
-    synchronized void adjustRandomizerIntensity(int i) {
-        this.randomizerIntensity = i;
-    }
+    synchronized void setModulatorIntensity(int i) { this.modulatorIntensity = i; }
 
     @Override
-    synchronized void startRandomizer() {
-        randomizerTask.run();
+    synchronized void startRandomMod() {
+        this.isModulatingRandom = true;
+        //randomizerTask.run();
+        Thread randomModThread = new Thread(new Runnable() {
+            int intervalModifier;
+            int rangeModifier;
+            int min;
+            int max;
+            int rand;
+            @Override
+            public void run() {
+                while(isModulatingRandom) {
+                    intervalModifier = modulatorSpeed;
+                    rangeModifier = modulatorIntensity;
+                    min = rangeModifier * 5512;
+                    max = 88200 - rangeModifier * 5512;
+                    rand = r.nextInt((max - min) + min) + Math.round(min / 2);
+                    adjustPitch(rand);
+                    try {
+                        Thread.sleep(2000 / modulatorSpeed);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+        randomModThread.start();
     }
 
     @Override
     synchronized void startSineMod() {
-        sineModTask.run();
+        this.isModulatingSine = true;
+        //sineModTask.run();
+        Thread sineModThread = new Thread(new Runnable() {
+            boolean climbing = true;
+            int intervalModifier;
+            int rangeModifier;
+            int min;
+            int max;
+            int i;
+
+            @Override
+            public void run() {
+                while(isModulatingSine) {
+                    intervalModifier = modulatorSpeed;
+                    rangeModifier = modulatorIntensity;
+                    min = rangeModifier * 5512;
+                    max = 88200 - rangeModifier * 5512;
+                    i = pitch;
+
+                    if (climbing) {
+                        if (i >= max - 10) {
+                            climbing = false;
+                        } else {
+                            adjustPitch(i + (10 * intervalModifier));
+                            //adjustPitch(i + 100);
+                        }
+                    } else {
+                        if (i <= min + 10) {
+                            climbing = true;
+                        } else {
+                            adjustPitch(i - (10 * intervalModifier));
+                            //adjustPitch(i - 100);
+                        }
+                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+        sineModThread.start();
     }
 
     @Override
     synchronized void startSawMod() {
-        sawModTask.run();
+        this.isModulatingSaw = true;
+        //sawModTask.run();
+        Thread sawModThread = new Thread(new Runnable() {
+            int intervalModifier;
+            int rangeModifier;
+            int min;
+            int max;
+            int i;
+            @Override
+            public void run() {
+                while(isModulatingSaw) {
+                    intervalModifier = modulatorSpeed;
+                    rangeModifier = modulatorIntensity;
+                    min = rangeModifier * 5512;
+                    max = 88200 - (rangeModifier * 5512);
+                    i = pitch;
+                    if (i >= max - 10) {
+                        adjustPitch(min);
+                    } else {
+                        adjustPitch(i + 10 * intervalModifier);
+                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+        sawModThread.start();
     }
 
-
     @Override
-    synchronized void removeModulationCallbacks(int i) {
-        switch (i){
-            case 0:
-                modulationHandler.removeCallbacks(randomizerTask);
-                break;
-            case 1:
-                modulationHandler.removeCallbacks(sineModTask);
-                break;
-            default:
-                modulationHandler.removeCallbacks(sawModTask);
-                break;
-        }
+    synchronized void stopRandomMod() {
+        //modulationHandler.removeCallbacks(randomizerTask);
+        this.isModulatingRandom = false;
     }
 
     @Override
-    synchronized boolean isLooping() {
-        return isLooping;
+    synchronized void stopSineMod() {
+        //modulationHandler.removeCallbacks(sineModTask);
+        this.isModulatingSine = false;
+    }
+
+    @Override
+    synchronized void stopSawMod() {
+        //modulationHandler.removeCallbacks(sawModTask);
+        this.isModulatingSaw = false;
     }
 
     @Override
     synchronized void shutdown() {
-        modulationHandler.removeCallbacksAndMessages(null);
+        //Stop all modulations
+        this.stopRandomMod();
+        this.stopSineMod();
+        this.stopSawMod();
         audioTrack.release();
     }
 
@@ -241,40 +348,47 @@ class RecordedSample extends Sample {
 
 
 
-    Runnable randomizerTask = new Runnable() {
+    /*Runnable randomizerTask = new Runnable() {
+        int intervalModifier;
+        int rangeModifier;
+        int min;
+        int max;
+        int rand;
         @Override
         public void run() {
-            int intervalModifier = randomizerInterval;
-            int rangeModifier = randomizerIntensity;
-            int min = 1 + rangeModifier * 5512;
-            int max = 88200 - rangeModifier * 5512;
-            int rand = r.nextInt((max - min) + min) + Math.round(min/2);
-            //pitchSlider.setProgress(rand);
+            intervalModifier = modulatorSpeed;
+            rangeModifier = modulatorIntensity;
+            min = rangeModifier * 5512;
+            max = 88200 - rangeModifier * 5512;
+            rand = r.nextInt((max - min) + min) + Math.round(min/2);
             adjustPitch(rand);
             modulationHandler.postDelayed(this, (2000 / intervalModifier));
-            //Log.d("repeat: ",Integer.toString(rand) + "/" + Integer.toString(intervalModifier));
         }
-    };
+    };*/
 
-    Runnable sineModTask = new Runnable() {
+
+    /*Runnable sineModTask = new Runnable() {
         boolean climbing = true;
+        int intervalModifier;
+        int rangeModifier;
+        int min;
+        int max;
+        int i;
+
         @Override
         public void run() {
-            int intervalModifier = randomizerInterval;
-            int rangeModifier = randomizerIntensity;
-            int min = 5512 + rangeModifier * 5512;
-            int max = 88200 - rangeModifier * 5512;
-            int i = pitch;
-            //Log.d("sinewave",Integer.toString(i));
-            int i2;
+            intervalModifier = modulatorSpeed;
+            rangeModifier = modulatorIntensity;
+            min = rangeModifier * 5512;
+            max = 88200 - rangeModifier * 5512;
+            i = pitch;
             if(climbing){
                 if(i >= max - 10){
                     climbing = false;
                 }
                 else{
-                    i2 = i + 100 * intervalModifier;
-                    //pitchSlider.setProgress(i2);
-                    adjustPitch(i2);
+                    //adjustPitch(i + 100 * intervalModifier);
+                    adjustPitch(i + 100);
                 }
             }
             else {
@@ -282,33 +396,36 @@ class RecordedSample extends Sample {
                     climbing = true;
                 }
                 else {
-                    i2 = i - 100 * intervalModifier;
-                    //pitchSlider.setProgress(i2);
-                    adjustPitch(i2);
+                    //adjustPitch(i - 100 * intervalModifier);
+                    adjustPitch(i - 100);
                 }
             }
-
-            modulationHandler.postDelayed(this, (20));
+            //modulationHandler.postDelayed(this, (20));
+            modulationHandler.postDelayed(this, (2000 / intervalModifier));
         }
-    };
+
+    };*/
 
     Runnable sawModTask = new Runnable() {
+        int intervalModifier;
+        int rangeModifier;
+        int min;
+        int max;
+        int i;
         @Override
         public void run() {
-            int intervalModifier = randomizerInterval;
-            int rangeModifier = randomizerIntensity;
-            int min = 5512 + (rangeModifier * 5512);
-            int max = 88200 - (rangeModifier * 5512);
-            int i = pitch;
-            int i2;
+            intervalModifier = modulatorSpeed;
+            rangeModifier = modulatorIntensity;
+            min = rangeModifier * 5512;
+            max = 88200 - (rangeModifier * 5512);
+            i = pitch;
 
             if(i >= max - 10){
-                i2 = min;
+                adjustPitch(min);
             }
             else{
-                i2 = i + 100 * intervalModifier;
+                adjustPitch(i + 100 * intervalModifier);
             }
-            adjustPitch(i2);
 
             modulationHandler.postDelayed(this, (20));
         }

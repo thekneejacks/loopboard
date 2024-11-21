@@ -3,14 +3,10 @@ package com.alexkang.loopboard;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
-import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 
@@ -23,6 +19,16 @@ public class SampleListAdapter extends BaseAdapter {
     private final Recorder recorder;
     //private final List<ImportedSample> importedSamples;
     private final List<RecordedSample> recordedSamples;
+
+    private static final int VOLUME_SLIDER_MAX = 100;
+    private static final int PITCH_SLIDER_MAX = 88200;
+    private static final int PITCH_SLIDER_MIN = 1;
+    private static final int PLAY_LENGTH_SLIDER_MAX = 100;
+    private static final int PLAY_LENGTH_SLIDER_MIN = 2;
+    private static final int RANDOMIZER_SPEED_SLIDER_MAX = 200;
+    private static final int RANDOMIZER_SPEED_SLIDER_MIN = 1;
+    private static final int RANDOMIZER_INTENSITY_SLIDER_MAX = 5;
+    private static final int RANDOMIZER_INTENSITY_SLIDER_MIN = 0;
 
     Random r;
 
@@ -96,38 +102,22 @@ public class SampleListAdapter extends BaseAdapter {
         r = new Random();
 
 
-        // Update the state of the loop button.
-        loopButton.setChecked(sample.isLooping());
-
         // Choose which buttons to show.
         rerecordButton.setVisibility(View.VISIBLE);
-        /*if (sample instanceof ImportedSample) {
-            // Show the stop button and hide the rerecord button.
-            //stopButton.setVisibility(View.VISIBLE);
-            rerecordButton.setVisibility(View.GONE);
-        } else {
-            // Hide the stop button and show the rerecord button.
-            //stopButton.setVisibility(View.GONE);
-            rerecordButton.setVisibility(View.VISIBLE);
-        }*/
 
 
-        //_____________________________Buttons_____________________________
 
-        /*rerecordButton.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                view.setPressed(true);
-                recorder.startRecording(
-                        recordedBytes -> ((RecordedSample) sample).save(context, recordedBytes));
-            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.setPressed(false);
-                recorder.stopRecording();
-                loopButton.setChecked(false);
-            }
-            return true;
-        });*/
-        rerecordButton.setChecked(false);
+        //__________________________________________________________Buttons__________________________________________________________
+
+        //Button Initialization
+        rerecordButton.setChecked(false); //this should only be checked when we are recording stuff.
+        loopButton.setChecked(sample.isLooping());
+        octaveButton.setChecked(sample.isHighOctave());
+        randomizerButton.setChecked(sample.isModulatingRandom());
+        sineModButton.setChecked(sample.isModulatingSine());
+        sawModButton.setChecked(sample.isModulatingSaw());
+
+        //Rerecord button
         rerecordButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 recorder.startRecording(
@@ -141,6 +131,7 @@ public class SampleListAdapter extends BaseAdapter {
             }
         });
 
+        //Loop(Play) Button
         loopButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sample.adjustVolume(volumeSlider.getProgress());
             sample.adjustPitch(pitchSlider.getProgress());
@@ -151,172 +142,116 @@ public class SampleListAdapter extends BaseAdapter {
             }
         });
 
-        /*muteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                sample.mute(true);
-            } else {
-                sample.mute(false);
-            }
-        });*/
-
+        //Octave Toggle Button
         octaveButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                sample.setHighOctave(true);
-            } else {
-                sample.setHighOctave(false);
-            }
+            sample.setHighOctave(isChecked);
         });
 
 
-
-
-        //sample.removeModulationCallbacks(2);
+        //Random Pitch Modulation Button
         randomizerButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            //sineModButton.setChecked(false);
             if (isChecked) {
-                sample.startRandomizer();
+                sample.startRandomMod();
             } else {
-                sample.removeModulationCallbacks(0);
+                sample.stopRandomMod();
                 sample.adjustPitch(pitchSlider.getProgress());
             }
         });
 
 
+        //"Sine wave" (actually a sawwave) Pitch Modulation Button
         sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             //randomizerButton.setChecked(false);
             if (isChecked) {
                 //pitchSlider.setProgress(44100);
                 sample.startSineMod();
             } else {
-                sample.removeModulationCallbacks(1);
+                sample.stopSineMod();
                 sample.adjustPitch(pitchSlider.getProgress());
             }
         });
 
+        //Saw-wave Pitch Modulation Button
         sawModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             //randomizerButton.setChecked(false);
             if (isChecked) {
                 //pitchSlider.setProgress(44100);
                 sample.startSawMod();
             } else {
-                sample.removeModulationCallbacks(2);
+                sample.stopSawMod();
                 sample.adjustPitch(pitchSlider.getProgress());
             }
         });
 
-        //_____________________________Sliders_____________________________
+        //__________________________________________________________Sliders__________________________________________________________
 
-        volumeSlider.setMax(100);
+        //Slider Initialization
+        volumeSlider.setMax(VOLUME_SLIDER_MAX);
+        pitchSlider.setMax(PITCH_SLIDER_MAX);
+        lengthSlider.setMax(PLAY_LENGTH_SLIDER_MAX);
+        randomizerSpeedSlider.setMax(RANDOMIZER_SPEED_SLIDER_MAX);
+        randomizerIntensitySlider.setMax(RANDOMIZER_INTENSITY_SLIDER_MAX);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pitchSlider.setMin(PITCH_SLIDER_MIN);
+            lengthSlider.setMin(PLAY_LENGTH_SLIDER_MIN);
+            randomizerSpeedSlider.setMin(RANDOMIZER_SPEED_SLIDER_MIN);
+            randomizerIntensitySlider.setMin(RANDOMIZER_INTENSITY_SLIDER_MIN);
+        }
         volumeSlider.setProgress(sample.getVolume());
+        pitchSlider.setProgress(sample.getPitch());
+        lengthSlider.setProgress(sample.getLength());
+        randomizerSpeedSlider.setProgress(sample.getModulatorSpeed());
+        randomizerIntensitySlider.setProgress(sample.getModulatorIntensity());
+
+        //Volume Slider
         volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 sample.adjustVolume(i);
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        pitchSlider.setMax(88200);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            pitchSlider.setMin(1);
-        }
-        pitchSlider.setProgress(sample.getPitch());
+        //Pitch Slider
         pitchSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 sample.adjustPitch(i);
-                /*if(i >= 0) {
-                    sample.adjustPitch(50 + (50 * (i/100)));
-                }
-                else{
-                    sample.adjustPitch(50 / (Math.abs(i/100) + 1));
-                }*/
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        lengthSlider.setMax(100);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            lengthSlider.setMin(2);
-        }
-        lengthSlider.setProgress(sample.getLength());
+        //Play Length Slider. high "play length" value makes the loop shorter and vice versa.
         lengthSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 sample.adjustPlayLength(i);
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        randomizerSpeedSlider.setMax(100);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            randomizerSpeedSlider.setMin(1);
-        }
-        randomizerSpeedSlider.setProgress(sample.getRandomizerInterval());
+        //Pitch Modulation Speed Slider
         randomizerSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
-                sample.adjustRandomizerInterval(i);
+                sample.setModulatorSpeed(i);
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        randomizerIntensitySlider.setMax(5);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            randomizerIntensitySlider.setMin(0);
-        }
-        randomizerIntensitySlider.setProgress(sample.getRandomizerIntensity());
+
+        //Pitch Modulation "Intensity" Slider. limits how high / low the modulator can set the sample's pitch value.
         randomizerIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) { ;
-                sample.adjustRandomizerIntensity(i);
+                sample.setModulatorIntensity(i);
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         return convertView;
