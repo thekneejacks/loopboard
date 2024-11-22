@@ -159,7 +159,7 @@ public class SampleListAdapter extends BaseAdapter {
         });
 
 
-        //"Sine wave" (actually a sawwave) Pitch Modulation Button
+        //"Sine wave" (actually a triangle wave) Pitch Modulation Button
         sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             //randomizerButton.setChecked(false);
             if (isChecked) {

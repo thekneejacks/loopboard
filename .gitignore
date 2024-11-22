@@ -14,3 +14,4 @@
 /.gradle
 /.idea
 /app/build
+app/build.gradle
