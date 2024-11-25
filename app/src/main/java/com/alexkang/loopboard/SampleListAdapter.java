@@ -89,15 +89,15 @@ public class SampleListAdapter extends BaseAdapter {
         CheckBox rerecordButton = convertView.findViewById(R.id.rerecord);
         CheckBox octaveButton = convertView.findViewById(R.id.octave);
         CheckBox loopButton = convertView.findViewById(R.id.loop);
-        CheckBox randomizerButton = convertView.findViewById(R.id.randomizer);
+        CheckBox randomModButton = convertView.findViewById(R.id.randomizer);
         CheckBox sineModButton = convertView.findViewById(R.id.sine);
         CheckBox sawModButton = convertView.findViewById(R.id.saw);
         //Button playButton = convertView.findViewById(R.id.play);
         SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
         SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
         SeekBar lengthSlider = convertView.findViewById(R.id.length_slider);
-        SeekBar randomizerSpeedSlider = convertView.findViewById(R.id.randomizer_speed_slider);
-        SeekBar randomizerIntensitySlider = convertView.findViewById(R.id.randomizer_intensity_slider);
+        SeekBar modulatorSpeedSlider = convertView.findViewById(R.id.randomizer_speed_slider);
+        SeekBar modulatorIntensitySlider = convertView.findViewById(R.id.randomizer_intensity_slider);
         //randomizerHandler = new Handler();
         r = new Random();
 
@@ -113,7 +113,7 @@ public class SampleListAdapter extends BaseAdapter {
         rerecordButton.setChecked(false); //this should only be checked when we are recording stuff.
         loopButton.setChecked(sample.isLooping());
         octaveButton.setChecked(sample.isHighOctave());
-        randomizerButton.setChecked(sample.isModulatingRandom());
+        randomModButton.setChecked(sample.isModulatingRandom());
         sineModButton.setChecked(sample.isModulatingSine());
         sawModButton.setChecked(sample.isModulatingSaw());
 
@@ -149,7 +149,7 @@ public class SampleListAdapter extends BaseAdapter {
 
 
         //Random Pitch Modulation Button
-        randomizerButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        randomModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 sample.startRandomMod();
             } else {
@@ -161,7 +161,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         //"Sine wave" (actually a triangle wave) Pitch Modulation Button
         sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            //randomizerButton.setChecked(false);
+            //randomModButton.setChecked(false);
             if (isChecked) {
                 //pitchSlider.setProgress(44100);
                 sample.startSineMod();
@@ -173,7 +173,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         //Saw-wave Pitch Modulation Button
         sawModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            //randomizerButton.setChecked(false);
+            //randomModButton.setChecked(false);
             if (isChecked) {
                 //pitchSlider.setProgress(44100);
                 sample.startSawMod();
@@ -189,19 +189,19 @@ public class SampleListAdapter extends BaseAdapter {
         volumeSlider.setMax(VOLUME_SLIDER_MAX);
         pitchSlider.setMax(PITCH_SLIDER_MAX);
         lengthSlider.setMax(PLAY_LENGTH_SLIDER_MAX);
-        randomizerSpeedSlider.setMax(RANDOMIZER_SPEED_SLIDER_MAX);
-        randomizerIntensitySlider.setMax(RANDOMIZER_INTENSITY_SLIDER_MAX);
+        modulatorSpeedSlider.setMax(RANDOMIZER_SPEED_SLIDER_MAX);
+        modulatorIntensitySlider.setMax(RANDOMIZER_INTENSITY_SLIDER_MAX);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pitchSlider.setMin(PITCH_SLIDER_MIN);
             lengthSlider.setMin(PLAY_LENGTH_SLIDER_MIN);
-            randomizerSpeedSlider.setMin(RANDOMIZER_SPEED_SLIDER_MIN);
-            randomizerIntensitySlider.setMin(RANDOMIZER_INTENSITY_SLIDER_MIN);
+            modulatorSpeedSlider.setMin(RANDOMIZER_SPEED_SLIDER_MIN);
+            modulatorIntensitySlider.setMin(RANDOMIZER_INTENSITY_SLIDER_MIN);
         }
         volumeSlider.setProgress(sample.getVolume());
         pitchSlider.setProgress(sample.getPitch());
         lengthSlider.setProgress(sample.getLength());
-        randomizerSpeedSlider.setProgress(sample.getModulatorSpeed());
-        randomizerIntensitySlider.setProgress(sample.getModulatorIntensity());
+        modulatorSpeedSlider.setProgress(sample.getModulatorSpeed());
+        modulatorIntensitySlider.setProgress(sample.getModulatorIntensity());
 
         //Volume Slider
         volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -235,7 +235,7 @@ public class SampleListAdapter extends BaseAdapter {
         });
 
         //Pitch Modulation Speed Slider
-        randomizerSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        modulatorSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 if(i >= RANDOMIZER_SPEED_SLIDER_MIN) sample.setModulatorSpeed(i);
@@ -246,7 +246,7 @@ public class SampleListAdapter extends BaseAdapter {
 
 
         //Pitch Modulation "Intensity" Slider. limits how high / low the modulator can set the sample's pitch value.
-        randomizerIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        modulatorIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 if(i >= RANDOMIZER_INTENSITY_SLIDER_MIN) sample.setModulatorIntensity(i);

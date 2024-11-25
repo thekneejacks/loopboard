@@ -179,130 +179,133 @@ class RecordedSample extends Sample {
 
     @Override
     synchronized void startRandomMod() {
-        this.isModulatingRandom = true;
-        //randomizerTask.run();
-        Thread randomModThread = new Thread(new Runnable() {
-            int intervalModifier;
-            int rangeModifier;
-            int min;
-            int max;
-            int rand;
-            @Override
-            public void run() {
-                while(isModulatingRandom) {
-                    intervalModifier = modulatorSpeed;
-                    rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - rangeModifier * 5512;
-                    rand = r.nextInt((max - min) + min) + Math.round(min / 2);
-                    adjustPitch(rand);
-                    try {
-                        Thread.sleep(2000 / modulatorSpeed);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+        if(!this.isModulatingRandom) {
+            this.isModulatingRandom = true;
+            Thread randomModThread = new Thread(new Runnable() {
+                int intervalModifier;
+                int rangeModifier;
+                int min;
+                int max;
+                int rand;
+
+                @Override
+                public void run() {
+                    while (isModulatingRandom) {
+                        intervalModifier = modulatorSpeed;
+                        rangeModifier = modulatorIntensity;
+                        min = rangeModifier * 5512;
+                        max = 88200 - rangeModifier * 5512;
+                        rand = r.nextInt((max - min) + min) + Math.round(min / 2);
+                        adjustPitch(rand);
+                        try {
+                            Thread.sleep(2000 / modulatorSpeed);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-            }
-        });
-        randomModThread.start();
+            });
+            randomModThread.start();
+        }
     }
 
     @Override
     synchronized void startSineMod() {
-        this.isModulatingSine = true;
-        //sineModTask.run();
-        Thread sineModThread = new Thread(new Runnable() {
-            boolean climbing = true;
-            int intervalModifier;
-            int rangeModifier;
-            int min;
-            int max;
-            int i;
+        if(!this.isModulatingSine) {
+            this.isModulatingSine = true;
+            Thread sineModThread = new Thread(new Runnable() {
+                boolean climbing = true;
+                int intervalModifier;
+                int rangeModifier;
+                int min;
+                int max;
+                int i;
 
-            @Override
-            public void run() {
-                while(isModulatingSine) {
-                    intervalModifier = modulatorSpeed;
-                    rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - rangeModifier * 5512;
-                    i = pitch;
+                @Override
+                public void run() {
+                    while (isModulatingSine) {
+                        intervalModifier = modulatorSpeed;
+                        rangeModifier = modulatorIntensity;
+                        min = rangeModifier * 5512;
+                        max = 88200 - rangeModifier * 5512;
+                        i = pitch;
 
-                    if (climbing) {
-                        if (i >= max - 10) {
-                            climbing = false;
+                        if (climbing) {
+                            if (i >= max - 10) {
+                                climbing = false;
+                            } else {
+                                adjustPitch(i + (10 * intervalModifier));
+                                //adjustPitch(i + 100);
+                            }
                         } else {
-                            adjustPitch(i + (10 * intervalModifier));
-                            //adjustPitch(i + 100);
+                            if (i <= min + 10) {
+                                climbing = true;
+                            } else {
+                                adjustPitch(i - (10 * intervalModifier));
+                                //adjustPitch(i - 100);
+                            }
                         }
-                    } else {
-                        if (i <= min + 10) {
-                            climbing = true;
-                        } else {
-                            adjustPitch(i - (10 * intervalModifier));
-                            //adjustPitch(i - 100);
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         }
-                    }
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
                     }
                 }
-            }
-        });
-        sineModThread.start();
+            });
+            sineModThread.start();
+        }
     }
 
     @Override
     synchronized void startSawMod() {
-        this.isModulatingSaw = true;
-        //sawModTask.run();
-        Thread sawModThread = new Thread(new Runnable() {
-            int intervalModifier;
-            int rangeModifier;
-            int min;
-            int max;
-            int i;
-            @Override
-            public void run() {
-                while(isModulatingSaw) {
-                    intervalModifier = modulatorSpeed;
-                    rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - (rangeModifier * 5512);
-                    i = pitch;
-                    if (i >= max - 10) {
-                        adjustPitch(min);
-                    } else {
-                        adjustPitch(i + 10 * intervalModifier);
-                    }
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+        if(!this.isModulatingSaw) {
+            this.isModulatingSaw = true;
+            //sawModTask.run();
+            Thread sawModThread = new Thread(new Runnable() {
+                int intervalModifier;
+                int rangeModifier;
+                int min;
+                int max;
+                int i;
+
+                @Override
+                public void run() {
+                    while (isModulatingSaw) {
+                        intervalModifier = modulatorSpeed;
+                        rangeModifier = modulatorIntensity;
+                        min = rangeModifier * 5512;
+                        max = 88200 - (rangeModifier * 5512);
+                        i = pitch;
+                        if (i >= max - 10) {
+                            adjustPitch(min);
+                        } else {
+                            adjustPitch(i + 10 * intervalModifier);
+                        }
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-            }
-        });
-        sawModThread.start();
+            });
+            sawModThread.start();
+        }
     }
 
     @Override
     synchronized void stopRandomMod() {
-        //modulationHandler.removeCallbacks(randomizerTask);
         this.isModulatingRandom = false;
     }
 
     @Override
     synchronized void stopSineMod() {
-        //modulationHandler.removeCallbacks(sineModTask);
         this.isModulatingSine = false;
     }
 
     @Override
     synchronized void stopSawMod() {
-        //modulationHandler.removeCallbacks(sawModTask);
         this.isModulatingSaw = false;
     }
 
