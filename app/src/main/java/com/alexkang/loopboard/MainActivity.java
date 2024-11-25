@@ -275,8 +275,8 @@ public class MainActivity extends AppCompatActivity {
                         .add(RecordedSample
                                 .openSavedSample(this, name));
                 Collections.sort(recordedSamples, (e1, e2) -> e1.getName().compareTo(e2.getName()));
-                Log.d("debug:","now if you'll excuse me...");
-                for (RecordedSample x: recordedSamples) Log.d("debug:",x.getName());
+                //Log.d("debug:","now if you'll excuse me...");
+                //for (RecordedSample x: recordedSamples) Log.d("debug:",x.getName());
                 sampleListAdapter.notifyDataSetChanged();
                 updateTutorialVisibility();
             });

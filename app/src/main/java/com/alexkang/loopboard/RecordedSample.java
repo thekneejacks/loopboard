@@ -179,7 +179,7 @@ class RecordedSample extends Sample {
 
     @Override
     synchronized void startRandomMod() {
-        if(!this.isModulatingRandom) {
+        if(!this.isModulatingRandom) { //no two random modulators should run simultaneously
             this.isModulatingRandom = true;
             Thread randomModThread = new Thread(new Runnable() {
                 int intervalModifier;
@@ -348,89 +348,4 @@ class RecordedSample extends Sample {
         // Write the audio bytes to the audioTrack to play back.
         audioTrack.write(bytes, 0, bytes.length);
     }
-
-
-
-    /*Runnable randomizerTask = new Runnable() {
-        int intervalModifier;
-        int rangeModifier;
-        int min;
-        int max;
-        int rand;
-        @Override
-        public void run() {
-            intervalModifier = modulatorSpeed;
-            rangeModifier = modulatorIntensity;
-            min = rangeModifier * 5512;
-            max = 88200 - rangeModifier * 5512;
-            rand = r.nextInt((max - min) + min) + Math.round(min/2);
-            adjustPitch(rand);
-            modulationHandler.postDelayed(this, (2000 / intervalModifier));
-        }
-    };*/
-
-
-    /*Runnable sineModTask = new Runnable() {
-        boolean climbing = true;
-        int intervalModifier;
-        int rangeModifier;
-        int min;
-        int max;
-        int i;
-
-        @Override
-        public void run() {
-            intervalModifier = modulatorSpeed;
-            rangeModifier = modulatorIntensity;
-            min = rangeModifier * 5512;
-            max = 88200 - rangeModifier * 5512;
-            i = pitch;
-            if(climbing){
-                if(i >= max - 10){
-                    climbing = false;
-                }
-                else{
-                    //adjustPitch(i + 100 * intervalModifier);
-                    adjustPitch(i + 100);
-                }
-            }
-            else {
-                if(i <= min + 10){
-                    climbing = true;
-                }
-                else {
-                    //adjustPitch(i - 100 * intervalModifier);
-                    adjustPitch(i - 100);
-                }
-            }
-            //modulationHandler.postDelayed(this, (20));
-            modulationHandler.postDelayed(this, (2000 / intervalModifier));
-        }
-
-    };*/
-
-    Runnable sawModTask = new Runnable() {
-        int intervalModifier;
-        int rangeModifier;
-        int min;
-        int max;
-        int i;
-        @Override
-        public void run() {
-            intervalModifier = modulatorSpeed;
-            rangeModifier = modulatorIntensity;
-            min = rangeModifier * 5512;
-            max = 88200 - (rangeModifier * 5512);
-            i = pitch;
-
-            if(i >= max - 10){
-                adjustPitch(min);
-            }
-            else{
-                adjustPitch(i + 100 * intervalModifier);
-            }
-
-            modulationHandler.postDelayed(this, (20));
-        }
-    };
 }
