@@ -120,36 +120,29 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_delete: {
-                // Display a deletion confirmation dialog before actually deleting.
-                new AlertDialog.Builder(this)
-                        .setMessage(getString(R.string.confirm_delete))
-                        .setPositiveButton(R.string.yes, (dialog, which) -> deleteAllRecordings())
-                        .setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
-                        .show();
-                return true;
-            }
-
-            case R.id.action_stop: {
-                // Stop all currently playing samples.
-                stopAllSamples();
-                return true;
-            }
-
-            case R.id.action_playAll: {
-                playAllSamples();
-                return true;
-            }
-
-            case R.id.action_reRecordAll: {
-                reRecordAllSamples();
-                return true;
-            }
-
-            default:
-                return true;
+        int id = item.getItemId();
+        if(id == R.id.action_delete){
+            new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.confirm_delete))
+                    .setPositiveButton(R.string.yes, (dialog, which) -> deleteAllRecordings())
+                    .setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
+                    .show();
+            return true;
         }
+        else if(id == R.id.action_stop){
+            // Stop all currently playing samples.
+            stopAllSamples();
+            return true;
+        }
+        else if(id == R.id.action_playAll){
+            playAllSamples();
+            return true;
+        }
+        else if(id == R.id.action_reRecordAll){
+            reRecordAllSamples();
+            return true;
+        }
+        return true;
     }
 
     @Override
@@ -174,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
         // recorder.refresh();
         refreshRecordings();
     }
+
 
     // ------- Private methods -------
 
@@ -324,12 +318,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void reRecordAllSamples() {
-        for (Sample sample : recordedSamples) {
-            if(!sample.isReRecording()) {
-                sample.startReRecording(getBaseContext());
+        Boolean doDelay = false; //todo
+        int delay = 250; //todo
+
+        Thread reRecordThread = new Thread(() -> {
+            for (Sample sample : recordedSamples) {
+                if(!sample.isReRecording()) {
+                    sample.startReRecording(getBaseContext());
+                }
+                runOnUiThread(sampleListAdapter::notifyDataSetChanged);
+
+                if(doDelay) {
+                    try {
+                        Thread.sleep(delay);
+
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
-        }
-        sampleListAdapter.notifyDataSetChanged();
+
+        });
+        reRecordThread.start();
     }
 
     private void shutdownSamples() {
