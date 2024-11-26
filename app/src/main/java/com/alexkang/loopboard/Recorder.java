@@ -94,12 +94,7 @@ class Recorder {
     }
 
     synchronized void refresh() {
-        if (audioRecord != null) {
-            audioRecord.release();
-        }
-        if (recordExecutor != null) {
-            recordExecutor.shutdown();
-        }
+        shutdown();
         audioRecord =
                 new AudioRecord(
                         MediaRecorder.AudioSource.MIC,
@@ -112,7 +107,11 @@ class Recorder {
     }
 
     synchronized void shutdown() {
-        recordExecutor.shutdown();
-        audioRecord.release();
+        if (audioRecord != null) {
+            audioRecord.release();
+        }
+        if (recordExecutor != null) {
+            recordExecutor.shutdown();
+        }
     }
 }
