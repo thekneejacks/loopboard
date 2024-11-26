@@ -314,6 +314,8 @@ class RecordedSample extends Sample {
         this.stopRandomMod();
         this.stopSineMod();
         this.stopSawMod();
+        this.reRecorder.stopRecording();
+        this.reRecorder.shutdown();
         audioTrack.release();
     }
 
@@ -350,10 +352,7 @@ class RecordedSample extends Sample {
 
     //I think each sample should have its own recorder. what could go wrong
     @Override synchronized void startReRecording(Context context){
-        reRecorder.startRecording(
-                recordedBytes -> {
-                    this.save(context, recordedBytes);
-                });
+        reRecorder.startRecording(recordedBytes -> this.save(context, recordedBytes));
     }
     @Override synchronized void stopReRecording(){
         reRecorder.stopRecording();

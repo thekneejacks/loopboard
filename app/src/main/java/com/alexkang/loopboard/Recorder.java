@@ -18,8 +18,7 @@ class Recorder {
     private static final int MIN_RECORDING_SIZE = 8000;
     private static final String TAG = "Recorder";
 
-    private final ExecutorService recordExecutor = Executors.newSingleThreadExecutor();
-
+    private ExecutorService recordExecutor;
     private AudioRecord audioRecord;
     private volatile boolean isRecording = false;
 
@@ -28,11 +27,7 @@ class Recorder {
     }
 
     Recorder() {
-        refresh();
-    }
-
-    synchronized boolean isRecording() {
-        return isRecording;
+        //refresh();
     }
 
     synchronized void startRecording(RecorderCallback recorderCallback) {
@@ -40,6 +35,8 @@ class Recorder {
             Log.d(TAG, "startRecording called while another recording is in progress");
             return;
         }
+
+        refresh();
 
         isRecording = true;
         recordExecutor.execute(() -> {
@@ -80,6 +77,8 @@ class Recorder {
                 Log.e(TAG, "Error while ending a recording");
             }
         });
+
+
     }
 
     synchronized void stopRecording() {
@@ -90,11 +89,16 @@ class Recorder {
 
         // Mark ourselves as not recording so the ongoing recording knows to stop.
         isRecording = false;
+        // to facilitate multiple recorders, release recordExecutor and audioRecord every time we stop recording
+        shutdown();
     }
 
     synchronized void refresh() {
         if (audioRecord != null) {
             audioRecord.release();
+        }
+        if (recordExecutor != null) {
+            recordExecutor.shutdown();
         }
         audioRecord =
                 new AudioRecord(
@@ -103,6 +107,8 @@ class Recorder {
                         AudioFormat.CHANNEL_IN_MONO,
                         AudioFormat.ENCODING_PCM_16BIT,
                         Utils.MIN_BUFFER_SIZE);
+        recordExecutor = Executors.newSingleThreadExecutor();
+
     }
 
     synchronized void shutdown() {
