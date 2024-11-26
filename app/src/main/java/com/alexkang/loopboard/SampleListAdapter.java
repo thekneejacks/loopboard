@@ -25,7 +25,7 @@ public class SampleListAdapter extends BaseAdapter {
     private static final int PLAY_LENGTH_SLIDER_MIN = 2;
     private static final int RANDOMIZER_SPEED_SLIDER_MAX = 200;
     private static final int RANDOMIZER_SPEED_SLIDER_MIN = 1;
-    private static final int RANDOMIZER_INTENSITY_SLIDER_MAX = 5;
+    private static final int RANDOMIZER_INTENSITY_SLIDER_MAX = 7;
     private static final int RANDOMIZER_INTENSITY_SLIDER_MIN = 0;
 
     Random r;
@@ -97,7 +97,7 @@ public class SampleListAdapter extends BaseAdapter {
         //__________________________________________________________Buttons__________________________________________________________
 
         //Button Initialization
-        rerecordButton.setChecked(false); //this should only be checked when we are recording stuff.
+        rerecordButton.setChecked(sample.isReRecording());
         loopButton.setChecked(sample.isLooping());
         octaveButton.setChecked(sample.isHighOctave());
         randomModButton.setChecked(sample.isModulatingRandom());

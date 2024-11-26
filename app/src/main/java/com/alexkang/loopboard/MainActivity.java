@@ -10,7 +10,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -122,24 +121,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_delete:
+            case R.id.action_delete: {
                 // Display a deletion confirmation dialog before actually deleting.
                 new AlertDialog.Builder(this)
                         .setMessage(getString(R.string.confirm_delete))
                         .setPositiveButton(R.string.yes, (dialog, which) -> deleteAllRecordings())
                         .setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
                         .show();
-
                 return true;
-            case R.id.action_stop:
+            }
+
+            case R.id.action_stop: {
                 // Stop all currently playing samples.
                 stopAllSamples();
-
                 return true;
-            case R.id.action_playall:
+            }
+
+            case R.id.action_playAll: {
                 playAllSamples();
                 return true;
-                default:
+            }
+
+            case R.id.action_reRecordAll: {
+                reRecordAllSamples();
+                return true;
+            }
+
+            default:
                 return true;
         }
     }
@@ -299,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
             sample.stopRandomMod();
             sample.stopSineMod();
             sample.stopSawMod();
+            sample.stopReRecording();
         }
 
         // Refresh the list to update button states.
@@ -309,6 +318,15 @@ public class MainActivity extends AppCompatActivity {
         for (Sample sample : recordedSamples) {
             if(!sample.isLooping()) {
                 sample.play(true);
+            }
+        }
+        sampleListAdapter.notifyDataSetChanged();
+    }
+
+    private void reRecordAllSamples() {
+        for (Sample sample : recordedSamples) {
+            if(!sample.isReRecording()) {
+                sample.startReRecording(getBaseContext());
             }
         }
         sampleListAdapter.notifyDataSetChanged();

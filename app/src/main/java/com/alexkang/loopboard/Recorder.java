@@ -84,6 +84,7 @@ class Recorder {
     synchronized void stopRecording() {
         if (!isRecording) {
             Log.d(TAG, "stopRecording called even though no recordings are in progress");
+            shutdown(); //anyway
             return;
         }
 

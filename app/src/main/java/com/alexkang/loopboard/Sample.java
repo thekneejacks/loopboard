@@ -25,6 +25,8 @@ abstract class Sample {
 
     abstract boolean isModulatingSaw();
 
+    abstract boolean isReRecording();
+
     abstract void play(boolean isLooped);
 
     abstract void stop();

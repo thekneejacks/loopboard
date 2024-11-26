@@ -5,7 +5,6 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.os.Handler;
 import android.util.Log;
 
 import java.io.File;
@@ -31,6 +30,7 @@ class RecordedSample extends Sample {
     private boolean isModulatingRandom;
     private boolean isModulatingSine;
     private boolean isModulatingSaw;
+    private boolean isReRecording;
     Random r = new Random();
 
 
@@ -72,6 +72,7 @@ class RecordedSample extends Sample {
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
         this.reRecorder = new Recorder();
+        this.isReRecording = false;
     }
 
     @Override String getName() {
@@ -107,6 +108,7 @@ class RecordedSample extends Sample {
     @Override boolean isModulatingSaw() {
         return isModulatingSaw;
     }
+    @Override boolean isReRecording() { return isReRecording;}
 
     @Override
     synchronized void play(boolean isLooped) {
@@ -314,8 +316,7 @@ class RecordedSample extends Sample {
         this.stopRandomMod();
         this.stopSineMod();
         this.stopSawMod();
-        this.reRecorder.stopRecording();
-        this.reRecorder.shutdown();
+        this.stopReRecording();
         audioTrack.release();
     }
 
@@ -352,9 +353,12 @@ class RecordedSample extends Sample {
 
     //I think each sample should have its own recorder. what could go wrong
     @Override synchronized void startReRecording(Context context){
+        if(this.isReRecording) return;
+        this.isReRecording = true;
         reRecorder.startRecording(recordedBytes -> this.save(context, recordedBytes));
     }
     @Override synchronized void stopReRecording(){
         reRecorder.stopRecording();
+        this.isReRecording = false;
     }
 }

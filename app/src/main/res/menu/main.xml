@@ -12,8 +12,13 @@
         android:title="@string/action_stop"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_playall"
+        android:id="@+id/action_playAll"
         android:icon="@drawable/ic_launcher"
-        android:title="Play all samples"
+        android:title="@string/play_all_samples"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_reRecordAll"
+        android:icon="@drawable/ic_launcher"
+        android:title="@string/start_re_recording_on_all_samples"
         app:showAsAction="never" />
 </menu>
