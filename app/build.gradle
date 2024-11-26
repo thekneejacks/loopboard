@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.alexkang.loopboard"
-        minSdkVersion 21
+        minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 30
         versionCode 20
@@ -30,4 +30,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.0'
     //noinspection GradleCompatible
     implementation 'com.google.android.material:material:1.0.0'
+    def shizuku_version = '13.1.5'
+    implementation "dev.rikka.shizuku:api:$shizuku_version"
+    // Add this line if you want to support Shizuku
+    implementation "dev.rikka.shizuku:provider:$shizuku_version"
 }

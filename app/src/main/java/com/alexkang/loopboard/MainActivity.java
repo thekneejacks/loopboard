@@ -1,5 +1,8 @@
 package com.alexkang.loopboard;
 
+import rikka.shizuku.Shizuku;
+import rikka.shizuku.ShizukuBinderWrapper;
+import rikka.shizuku.SystemServiceHelper;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -10,6 +13,8 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private final SampleListAdapter sampleListAdapter =
             new SampleListAdapter(this, recordedSamples);
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
+    private final Shizuku.OnRequestPermissionResultListener REQUEST_PERMISSION_RESULT_LISTENER = this::onRequestPermissionsResult;
 
     // ------- Activity lifecycle methods -------
 
@@ -48,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+        Shizuku.addRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER);
 
         checkPermissions();
 
@@ -106,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         shutdownSamples();
+        Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER);
 
         recorder.shutdown();
         saveExecutor.shutdown();
@@ -186,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
         if (!permissionsGranted) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
         }
+        checkShizukuPermission(PERMISSION_REQUEST_CODE);
     }
 
     private void updateTutorialVisibility() {
@@ -375,4 +384,28 @@ public class MainActivity extends AppCompatActivity {
                 R.string.samples_deleted,
                 Snackbar.LENGTH_SHORT).show();
 	}
+    
+    private boolean checkShizukuPermission(int code) {
+        if (Shizuku.isPreV11()) {
+            // Pre-v11 is unsupported
+            return false;
+        }
+
+        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+            // Granted
+            return true;
+        } else if (Shizuku.shouldShowRequestPermissionRationale()) {
+            // Users choose "Deny and don't ask again"
+            return false;
+        } else {
+            // Request the permission
+            Shizuku.requestPermission(code);
+            return false;
+        }
+    }
+    private void onRequestPermissionsResult(int requestCode, int grantResult) {
+        boolean granted = grantResult == PackageManager.PERMISSION_GRANTED;
+        // Do stuff based on the result and the request code
+    }
+
 }
