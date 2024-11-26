@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private final ArrayList<RecordedSample> recordedSamples = new ArrayList<>();
     private final Recorder recorder = new Recorder();
     private final SampleListAdapter sampleListAdapter =
-            new SampleListAdapter(this, recorder, recordedSamples);
+            new SampleListAdapter(this, recordedSamples);
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
 
     // ------- Activity lifecycle methods -------

@@ -16,8 +16,6 @@ import java.util.Random;
 public class SampleListAdapter extends BaseAdapter {
 
     private final Context context;
-    private final Recorder recorder;
-    //private final List<ImportedSample> importedSamples;
     private final List<RecordedSample> recordedSamples;
 
     private static final int VOLUME_SLIDER_MAX = 100;
@@ -34,12 +32,8 @@ public class SampleListAdapter extends BaseAdapter {
 
     SampleListAdapter(
             Context context,
-            Recorder recorder,
-            //List<ImportedSample> importedSamples,
             List<RecordedSample> recordedSamples) {
         this.context = context;
-        this.recorder = recorder;
-        //this.importedSamples = importedSamples;
         this.recordedSamples = recordedSamples;
     }
 
@@ -50,13 +44,6 @@ public class SampleListAdapter extends BaseAdapter {
 
     @Override
     public Sample getItem(int position) {
-        /*if (position < importedSamples.size()) {
-            return importedSamples.get(position);
-        } else if (position - importedSamples.size() < recordedSamples.size()) {
-            return recordedSamples.get(position - importedSamples.size());
-        } else {
-            return null;
-        }*/
         if (position < recordedSamples.size()) {
             return recordedSamples.get(position);
         } else {
@@ -120,20 +107,10 @@ public class SampleListAdapter extends BaseAdapter {
         //Rerecord button
         rerecordButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                if(recorder.isRecording()){
-                    rerecordButton.setChecked(false);
-                    return;
-                }
-                recorder.startRecording(
-                        recordedBytes -> {
-                            assert sample instanceof RecordedSample;
-                            ((RecordedSample) sample).save(context, recordedBytes);
-                        });
+                sample.startReRecording(context);
             } else {
-                if(recorder.isRecording()) {
-                    recorder.stopRecording();
-                    loopButton.setChecked(false);
-                }
+                sample.stopReRecording();
+                loopButton.setChecked(false);
             }
         });
 
@@ -167,9 +144,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         //"Sine wave" (actually a triangle wave) Pitch Modulation Button
         sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            //randomModButton.setChecked(false);
             if (isChecked) {
-                //pitchSlider.setProgress(44100);
                 sample.startSineMod();
             } else {
                 sample.stopSineMod();
@@ -179,9 +154,7 @@ public class SampleListAdapter extends BaseAdapter {
 
         //Saw-wave Pitch Modulation Button
         sawModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            //randomModButton.setChecked(false);
             if (isChecked) {
-                //pitchSlider.setProgress(44100);
                 sample.startSawMod();
             } else {
                 sample.stopSawMod();
@@ -223,7 +196,7 @@ public class SampleListAdapter extends BaseAdapter {
         pitchSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                //workaround for old devices
+                //workaround for old devices that don't support min slider value
                 if(i >= PITCH_SLIDER_MIN) sample.adjustPitch(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -234,6 +207,7 @@ public class SampleListAdapter extends BaseAdapter {
         lengthSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                //workaround for old devices that don't support min slider value
                 if(i >= PLAY_LENGTH_SLIDER_MIN) sample.adjustPlayLength(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -244,6 +218,7 @@ public class SampleListAdapter extends BaseAdapter {
         modulatorSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                //workaround for old devices that don't support min slider value
                 if(i >= RANDOMIZER_SPEED_SLIDER_MIN) sample.setModulatorSpeed(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -255,6 +230,7 @@ public class SampleListAdapter extends BaseAdapter {
         modulatorIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                //workaround for old devices that don't support min slider value
                 if(i >= RANDOMIZER_INTENSITY_SLIDER_MIN) sample.setModulatorIntensity(i);
             }
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}

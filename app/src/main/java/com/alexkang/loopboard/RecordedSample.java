@@ -20,6 +20,7 @@ class RecordedSample extends Sample {
     private final String name;
     private byte[] bytes;
     private AudioTrack audioTrack;
+    private final Recorder reRecorder;
     private int volume;
     private int pitch;
     private int play_length;
@@ -30,7 +31,6 @@ class RecordedSample extends Sample {
     private boolean isModulatingRandom;
     private boolean isModulatingSine;
     private boolean isModulatingSaw;
-    private final Handler modulationHandler = new Handler();
     Random r = new Random();
 
 
@@ -71,6 +71,7 @@ class RecordedSample extends Sample {
         this.play_length = 2;
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
+        this.reRecorder = new Recorder();
     }
 
     @Override String getName() {
@@ -138,10 +139,7 @@ class RecordedSample extends Sample {
     @Override
     synchronized void adjustVolume(int targetVolume) {
         this.volume = targetVolume;
-        //if(this.isMuted) return;
-
         float finalvolume = (float) (targetVolume / 100.0);
-        //Log.d("actual volume:",Float.toString(finalvolume));
         audioTrack.setVolume(finalvolume);
     }
 
@@ -150,11 +148,6 @@ class RecordedSample extends Sample {
         this.pitch = i;
         if(this.isHighOctave) audioTrack.setPlaybackRate(i*2);
         else audioTrack.setPlaybackRate(i);
-        /*this.pitch = i;
-        PlaybackParams params = new PlaybackParams();
-        params.setPitch((float) (i / 50.0));
-        params.setSpeed((float) (i / 50.0));
-        audioTrack.setPlaybackParams(params);*/
     }
 
     @Override
@@ -179,119 +172,125 @@ class RecordedSample extends Sample {
 
     @Override
     synchronized void startRandomMod() {
-        if(!this.isModulatingRandom) { //no two random modulators should run simultaneously
-            this.isModulatingRandom = true;
-            Thread randomModThread = new Thread(new Runnable() {
-                int intervalModifier;
-                int rangeModifier;
-                int min;
-                int max;
-                int rand;
+        if(this.isModulatingRandom) {
+            //no two random modulators should run simultaneously
+            return;
+        }
+        this.isModulatingRandom = true;
+        Thread randomModThread = new Thread(new Runnable() {
+            int intervalModifier;
+            int rangeModifier;
+            int min;
+            int max;
+            int rand;
 
-                @Override
-                public void run() {
-                    while (isModulatingRandom) {
-                        intervalModifier = modulatorSpeed;
-                        rangeModifier = modulatorIntensity;
-                        min = rangeModifier * 5512;
-                        max = 88200 - rangeModifier * 5512;
-                        rand = r.nextInt((max - min) + min) + Math.round(min / 2);
-                        adjustPitch(rand);
-                        try {
-                            Thread.sleep(2000 / modulatorSpeed);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+            @Override
+            public void run() {
+                while (isModulatingRandom) {
+                    intervalModifier = modulatorSpeed;
+                    rangeModifier = modulatorIntensity;
+                    min = rangeModifier * 5512;
+                    max = 88200 - rangeModifier * 5512;
+                    rand = r.nextInt((max - min) + min) + Math.round(min / 2);
+                    adjustPitch(rand);
+                    try {
+                        Thread.sleep(2000 / modulatorSpeed);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            });
-            randomModThread.start();
-        }
+            }
+        });
+        randomModThread.start();
+
     }
 
     @Override
     synchronized void startSineMod() {
-        if(!this.isModulatingSine) {
-            this.isModulatingSine = true;
-            Thread sineModThread = new Thread(new Runnable() {
-                boolean climbing = true;
-                int intervalModifier;
-                int rangeModifier;
-                int min;
-                int max;
-                int i;
+        if(this.isModulatingSine) {
+            //no two sine modulators should run simultaneously
+            return;
+        }
+        this.isModulatingSine = true;
+        Thread sineModThread = new Thread(new Runnable() {
+            boolean climbing = true;
+            int intervalModifier;
+            int rangeModifier;
+            int min;
+            int max;
+            int i;
 
-                @Override
-                public void run() {
-                    while (isModulatingSine) {
-                        intervalModifier = modulatorSpeed;
-                        rangeModifier = modulatorIntensity;
-                        min = rangeModifier * 5512;
-                        max = 88200 - rangeModifier * 5512;
-                        i = pitch;
+            @Override
+            public void run() {
+                while (isModulatingSine) {
+                    intervalModifier = modulatorSpeed;
+                    rangeModifier = modulatorIntensity;
+                    min = rangeModifier * 5512;
+                    max = 88200 - rangeModifier * 5512;
+                    i = pitch;
 
-                        if (climbing) {
-                            if (i >= max - 10) {
-                                climbing = false;
-                            } else {
-                                adjustPitch(i + (10 * intervalModifier));
-                                //adjustPitch(i + 100);
-                            }
+                    if (climbing) {
+                        if (i >= max - 10) {
+                            climbing = false;
                         } else {
-                            if (i <= min + 10) {
-                                climbing = true;
-                            } else {
-                                adjustPitch(i - (10 * intervalModifier));
-                                //adjustPitch(i - 100);
-                            }
+                            adjustPitch(i + (10 * intervalModifier));
+                            //adjustPitch(i + 100);
                         }
-                        try {
-                            Thread.sleep(1);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
+                    } else {
+                        if (i <= min + 10) {
+                            climbing = true;
+                        } else {
+                            adjustPitch(i - (10 * intervalModifier));
+                            //adjustPitch(i - 100);
                         }
                     }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            });
-            sineModThread.start();
-        }
+            }
+        });
+        sineModThread.start();
     }
 
     @Override
     synchronized void startSawMod() {
-        if(!this.isModulatingSaw) {
-            this.isModulatingSaw = true;
-            //sawModTask.run();
-            Thread sawModThread = new Thread(new Runnable() {
-                int intervalModifier;
-                int rangeModifier;
-                int min;
-                int max;
-                int i;
+        if(this.isModulatingSaw) {
+            //no two saw modulators should run simultaneously
+            return;
+        }
+        this.isModulatingSaw = true;
+        Thread sawModThread = new Thread(new Runnable() {
+            int intervalModifier;
+            int rangeModifier;
+            int min;
+            int max;
+            int i;
 
-                @Override
-                public void run() {
-                    while (isModulatingSaw) {
-                        intervalModifier = modulatorSpeed;
-                        rangeModifier = modulatorIntensity;
-                        min = rangeModifier * 5512;
-                        max = 88200 - (rangeModifier * 5512);
-                        i = pitch;
-                        if (i >= max - 10) {
-                            adjustPitch(min);
-                        } else {
-                            adjustPitch(i + 10 * intervalModifier);
-                        }
-                        try {
-                            Thread.sleep(1);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+            @Override
+            public void run() {
+                while (isModulatingSaw) {
+                    intervalModifier = modulatorSpeed;
+                    rangeModifier = modulatorIntensity;
+                    min = rangeModifier * 5512;
+                    max = 88200 - (rangeModifier * 5512);
+                    i = pitch;
+                    if (i >= max - 10) {
+                        adjustPitch(min);
+                    } else {
+                        adjustPitch(i + 10 * intervalModifier);
+                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            });
-            sawModThread.start();
-        }
+            }
+        });
+        sawModThread.start();
     }
 
     @Override
@@ -347,5 +346,16 @@ class RecordedSample extends Sample {
 
         // Write the audio bytes to the audioTrack to play back.
         audioTrack.write(bytes, 0, bytes.length);
+    }
+
+    //I think each sample should have its own recorder. what could go wrong
+    @Override synchronized void startReRecording(Context context){
+        reRecorder.startRecording(
+                recordedBytes -> {
+                    this.save(context, recordedBytes);
+                });
+    }
+    @Override synchronized void stopReRecording(){
+        reRecorder.stopRecording();
     }
 }

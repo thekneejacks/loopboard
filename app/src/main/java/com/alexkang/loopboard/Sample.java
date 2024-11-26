@@ -1,6 +1,8 @@
 package com.alexkang.loopboard;
 
 
+import android.content.Context;
+
 abstract class Sample {
 
     abstract String getName();
@@ -54,4 +56,9 @@ abstract class Sample {
     abstract void setModulatorSpeed(int i);
 
     abstract void setModulatorIntensity(int i);
+
+    //I think each sample should have its own recorder. what could go wrong
+    abstract void startReRecording(Context context);
+
+    abstract void stopReRecording();
 }
