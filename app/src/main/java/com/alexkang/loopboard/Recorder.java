@@ -31,6 +31,10 @@ class Recorder {
         refresh();
     }
 
+    synchronized boolean isRecording() {
+        return isRecording;
+    }
+
     synchronized void startRecording(RecorderCallback recorderCallback) {
         if (isRecording) {
             Log.d(TAG, "startRecording called while another recording is in progress");

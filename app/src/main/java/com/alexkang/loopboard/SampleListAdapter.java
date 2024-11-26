@@ -120,14 +120,20 @@ public class SampleListAdapter extends BaseAdapter {
         //Rerecord button
         rerecordButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
+                if(recorder.isRecording()){
+                    rerecordButton.setChecked(false);
+                    return;
+                }
                 recorder.startRecording(
                         recordedBytes -> {
                             assert sample instanceof RecordedSample;
                             ((RecordedSample) sample).save(context, recordedBytes);
                         });
             } else {
-                recorder.stopRecording();
-                loopButton.setChecked(false);
+                if(recorder.isRecording()) {
+                    recorder.stopRecording();
+                    loopButton.setChecked(false);
+                }
             }
         });
 
