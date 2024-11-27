@@ -1,12 +1,14 @@
 package com.alexkang.loopboard;
 
-import android.app.Activity;
+
+
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
+import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.projection.MediaProjection;
 import android.util.Log;
-import android.widget.Toast;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -17,16 +19,27 @@ class Recorder {
     private static final int AUDIO_CUTOFF_LENGTH = 12000;
     private static final int MIN_RECORDING_SIZE = 8000;
     private static final String TAG = "Recorder";
+    //private final MediaProjection mediaProjection;
 
     private ExecutorService recordExecutor;
     private AudioRecord audioRecord;
+    private final MediaProjection mediaProjection;
+    private AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
+    private final AudioFormat audioFormat;
     private volatile boolean isRecording = false;
 
     interface RecorderCallback {
         void onAudioRecorded(byte[] recordedBytes);
     }
 
-    Recorder() {
+    Recorder(MediaProjection mProjection) {
+        this.mediaProjection = mProjection;
+        if(mediaProjection != null) createAudioPlaybackCaptureConfiguration();
+        audioFormat = new AudioFormat.Builder()
+                .setSampleRate(Utils.SAMPLE_RATE_HZ)
+                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .build();
         //refresh();
     }
 
@@ -37,6 +50,7 @@ class Recorder {
         }
 
         refresh();
+
 
         isRecording = true;
         recordExecutor.execute(() -> {
@@ -53,8 +67,11 @@ class Recorder {
 
             // Remove a small first chunk of the recording to avoid the sound of the user tapping
             // the button.
-            audioRecord.read(
-                    new byte[AUDIO_CUTOFF_LENGTH], 0, AUDIO_CUTOFF_LENGTH);
+
+            if(mediaProjection == null) { // but only when we're using the microphone
+                audioRecord.read(
+                        new byte[AUDIO_CUTOFF_LENGTH], 0, AUDIO_CUTOFF_LENGTH);
+            }
 
             // Keep recording until stopRecording() is invoked.
             while (isRecording) {
@@ -96,13 +113,20 @@ class Recorder {
 
     synchronized void refresh() {
         shutdown();
-        audioRecord =
-                new AudioRecord(
-                        MediaRecorder.AudioSource.MIC,
-                        Utils.SAMPLE_RATE_HZ,
-                        AudioFormat.CHANNEL_IN_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT,
-                        Utils.MIN_BUFFER_SIZE);
+        if(mediaProjection == null) {
+            audioRecord = new AudioRecord.Builder()
+                    .setAudioSource(MediaRecorder.AudioSource.MIC)
+                    .setAudioFormat(audioFormat)
+                    .setBufferSizeInBytes(Utils.MIN_BUFFER_SIZE)
+                    .build();
+        } else {
+            audioRecord = new AudioRecord.Builder()
+                    .setAudioPlaybackCaptureConfig(audioPlaybackCaptureConfiguration)
+                    .setAudioFormat(audioFormat)
+                    .setBufferSizeInBytes(Utils.MIN_BUFFER_SIZE)
+                    .build();
+        }
+
         recordExecutor = Executors.newSingleThreadExecutor();
 
     }
@@ -115,4 +139,17 @@ class Recorder {
             recordExecutor.shutdown();
         }
     }
+
+    private void createAudioPlaybackCaptureConfiguration() {
+        try {
+            AudioPlaybackCaptureConfiguration.Builder audioPlaybackCaptureConfigurationBuilder =
+                    new AudioPlaybackCaptureConfiguration.Builder(mediaProjection).addMatchingUsage(AudioAttributes.USAGE_MEDIA);
+            audioPlaybackCaptureConfiguration =
+                    audioPlaybackCaptureConfigurationBuilder.build();
+        } catch (Exception e) {
+            Log.e(TAG, "createAudioPlaybackCaptureConfiguration: Error:", e);
+            e.printStackTrace();
+        }
+    }
+
 }

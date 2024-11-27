@@ -2,10 +2,12 @@ package com.alexkang.loopboard;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -13,6 +15,9 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -39,11 +44,13 @@ public class MainActivity extends AppCompatActivity {
 
     //private final ArrayList<ImportedSample> importedSamples = new ArrayList<>();
     private final ArrayList<RecordedSample> recordedSamples = new ArrayList<>();
-    private final Recorder recorder = new Recorder();
+    private Recorder recorder;
     private final SampleListAdapter sampleListAdapter =
             new SampleListAdapter(this, recordedSamples);
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
     private MediaProjectionManager mediaProjectionManager;
+    private MediaProjection mediaProjection;
+
 
     // ------- Activity lifecycle methods -------
 
@@ -63,6 +70,10 @@ public class MainActivity extends AppCompatActivity {
         // Initialize the sample list.
         sampleList.setAdapter(sampleListAdapter);
 
+        // Initialize recorder
+        //if(canCaptureAudio) recorder = new Recorder(mediaProjection);
+        //else recorder = new Recorder(null);
+
         // Add some footer space at the bottom of the sample list.
         View footer = new View(this);
         footer.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, FOOTER_SIZE_DP));
@@ -71,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Define the record button behavior. Tap and hold to record, release to stop and save.
         recordButton.setOnTouchListener((view, motionEvent) -> {
+            // Just in case we tap the record button too early
+            if(recorder == null) return true;
+
             int action = motionEvent.getAction();
 
             if (action == MotionEvent.ACTION_DOWN) {
@@ -111,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         shutdownSamples();
+
+        stopMediaProjectionService();
 
         recorder.shutdown();
         saveExecutor.shutdown();
@@ -230,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
         //for (String x: samplesList) Log.d("debug:",x);
         for (String x : samplesList) {
             //Log.d("debug",x);
-            RecordedSample recordedSample = RecordedSample.openSavedSample(this, x);
+            RecordedSample recordedSample = RecordedSample.openSavedSample(this, x, mediaProjection);
             if (recordedSample != null) {
                 recordedSamples.add(recordedSample);
             }
@@ -283,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 recordedSamples
                         .add(RecordedSample
-                                .openSavedSample(this, name));
+                                .openSavedSample(this, name, mediaProjection));
                 Collections.sort(recordedSamples, (e1, e2) -> e1.getName().compareTo(e2.getName()));
                 //Log.d("debug:","now if you'll excuse me...");
                 //for (RecordedSample x: recordedSamples) Log.d("debug:",x.getName());
@@ -389,14 +405,51 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode == RESULT_CANCELED){
             Snackbar.make(
                     findViewById(R.id.root_layout),
-                    "Audio capture not granted. Switching to Microphone mode.", //TODO
+                    "Audio capture not granted. Switching to Microphone mode.",
                     Snackbar.LENGTH_SHORT).show();
+
+            //mediaProjection is null; recorder will automatically use microphone
+            recorder = new Recorder(null);
         }
         else if(resultCode == RESULT_OK){
-            Snackbar.make(
-                    findViewById(R.id.root_layout),
-                    "Audio capture granted.",
-                    Snackbar.LENGTH_SHORT).show();
+            Intent startIntent = new Intent(this, MediaProjectionService.class);
+            startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+            ContextCompat.startForegroundService(this,startIntent);
+
+             new Handler().postDelayed(() -> {
+                if (isMyServiceRunning()){
+                    mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data);
+                    if(mediaProjection != null){
+                        Snackbar.make(
+                                findViewById(R.id.root_layout),
+                                "Audio capture granted.",
+                                Snackbar.LENGTH_SHORT).show();
+                        recorder = new Recorder(mediaProjection);
+                    } else {
+                        Snackbar.make(
+                                findViewById(R.id.root_layout),
+                                "Failed to grant audio capture. falling back to Microphone mode.",
+                                Snackbar.LENGTH_SHORT).show();
+                        recorder = new Recorder(null);
+                    }
+                }
+            }, 200);
         }
+    }
+
+    private void stopMediaProjectionService(){
+        Intent stopIntent = new Intent(MainActivity.this, MediaProjectionService.class);
+        stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+        startService(stopIntent);
+    }
+
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (MediaProjectionService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
