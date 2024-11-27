@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 class Recorder {
 
-    private static final int AUDIO_CUTOFF_LENGTH = 12000;
+    private static final int AUDIO_CUTOFF_LENGTH = (int) (Utils.SAMPLE_RATE_HZ / 3.675);
     private static final int MIN_RECORDING_SIZE = 8000;
     private static final String TAG = "Recorder";
     //private final MediaProjection mediaProjection;
