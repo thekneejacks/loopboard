@@ -3,7 +3,10 @@ package com.alexkang.loopboard;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private final SampleListAdapter sampleListAdapter =
             new SampleListAdapter(this, recordedSamples);
     private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
+    private MediaProjectionManager mediaProjectionManager;
 
     // ------- Activity lifecycle methods -------
 
@@ -48,10 +52,11 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+        mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
         checkPermissions();
 
-		// Retrieve UI elements.
+        // Retrieve UI elements.
         ListView sampleList = findViewById(R.id.sound_list);
         Button recordButton = findViewById(R.id.record_button);
 
@@ -186,6 +191,9 @@ public class MainActivity extends AppCompatActivity {
         if (!permissionsGranted) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
         }
+
+        Intent intent = mediaProjectionManager.createScreenCaptureIntent();
+        this.startActivityForResult(intent, PERMISSION_REQUEST_CODE);
     }
 
     private void updateTutorialVisibility() {
@@ -375,4 +383,20 @@ public class MainActivity extends AppCompatActivity {
                 R.string.samples_deleted,
                 Snackbar.LENGTH_SHORT).show();
 	}
+
+    //Audio capture code
+    protected void onActivityResult (int requestCode, int resultCode, Intent data){
+        if(resultCode == RESULT_CANCELED){
+            Snackbar.make(
+                    findViewById(R.id.root_layout),
+                    "Audio capture not granted. Switching to Microphone mode.", //TODO
+                    Snackbar.LENGTH_SHORT).show();
+        }
+        else if(resultCode == RESULT_OK){
+            Snackbar.make(
+                    findViewById(R.id.root_layout),
+                    "Audio capture granted.",
+                    Snackbar.LENGTH_SHORT).show();
+        }
+    }
 }
