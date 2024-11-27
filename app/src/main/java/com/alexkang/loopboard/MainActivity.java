@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         // All permissions have been granted. Proceed with the app. Also remember to refresh the
         // recorder in case the record audio permission was recently granted.
         // recorder.refresh();
-        refreshRecordings();
+        //refreshRecordings();
     }
 
 
