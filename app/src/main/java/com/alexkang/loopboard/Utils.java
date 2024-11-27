@@ -15,7 +15,13 @@ class Utils {
     static final int MAX_SAMPLES = 24;
     static final String IMPORTED_SAMPLE_PATH =
             Environment.getExternalStorageDirectory() + "/LoopBoard";
-    static final int SAMPLE_RATE_HZ = 44100;
+    static final int SAMPLE_RATE_HZ = 48000;
+
+    static final int SAMPLE_RATE_HZ_TIMES_TWO = SAMPLE_RATE_HZ * 2;
+
+    static final int SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT = SAMPLE_RATE_HZ / 8;
+
+
     static final int MIN_BUFFER_SIZE = AudioRecord.getMinBufferSize(
             SAMPLE_RATE_HZ,
             AudioFormat.CHANNEL_IN_MONO,

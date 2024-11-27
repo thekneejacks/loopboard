@@ -19,7 +19,7 @@ public class SampleListAdapter extends BaseAdapter {
     private final List<RecordedSample> recordedSamples;
 
     private static final int VOLUME_SLIDER_MAX = 100;
-    private static final int PITCH_SLIDER_MAX = 88200;
+    private static final int PITCH_SLIDER_MAX = Utils.SAMPLE_RATE_HZ_TIMES_TWO;
     private static final int PITCH_SLIDER_MIN = 1;
     private static final int PLAY_LENGTH_SLIDER_MAX = 100;
     private static final int PLAY_LENGTH_SLIDER_MIN = 2;

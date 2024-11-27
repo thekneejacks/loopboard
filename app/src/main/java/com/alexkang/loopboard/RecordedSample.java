@@ -68,7 +68,7 @@ class RecordedSample extends Sample {
     private RecordedSample(String name, MediaProjection mediaProjection) {
         this.name = name;
         this.volume = 100;
-        this.pitch = 44100;
+        this.pitch = Utils.SAMPLE_RATE_HZ;
         this.play_length = 2;
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
@@ -192,8 +192,8 @@ class RecordedSample extends Sample {
                 while (isModulatingRandom) {
                     intervalModifier = modulatorSpeed;
                     rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - rangeModifier * 5512;
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
+                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
                     rand = r.nextInt((max - min) + min) + Math.round(min / 2);
                     adjustPitch(rand);
                     try {
@@ -228,8 +228,8 @@ class RecordedSample extends Sample {
                 while (isModulatingSine) {
                     intervalModifier = modulatorSpeed;
                     rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - rangeModifier * 5512;
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
+                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
                     i = pitch;
 
                     if (climbing) {
@@ -277,8 +277,8 @@ class RecordedSample extends Sample {
                 while (isModulatingSaw) {
                     intervalModifier = modulatorSpeed;
                     rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - (rangeModifier * 5512);
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
+                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - (rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT);
                     i = pitch;
                     if (i >= max - 10) {
                         adjustPitch(min);
