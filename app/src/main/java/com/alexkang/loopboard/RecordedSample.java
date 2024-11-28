@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.projection.MediaProjection;
 import android.util.Log;
 
 import java.io.File;
@@ -40,7 +41,7 @@ class RecordedSample extends Sample {
      *
      * @return A sample object ready to be played, or null if an error occurred.
      */
-    static RecordedSample openSavedSample(Context context, String fileName) {
+    static RecordedSample openSavedSample(Context context, String fileName, MediaProjection mediaProjection) {
         try {
             // Read the file into bytes.
             FileInputStream input = context.openFileInput(fileName);
@@ -50,7 +51,7 @@ class RecordedSample extends Sample {
 
             // Make sure we actually read all the bytes.
             if (bytesRead == output.length) {
-                RecordedSample recordedSample = new RecordedSample(fileName);
+                RecordedSample recordedSample = new RecordedSample(fileName,mediaProjection);
                 recordedSample.loadNewSample(output);
                 return recordedSample;
             }
@@ -64,14 +65,14 @@ class RecordedSample extends Sample {
         return null;
     }
 
-    private RecordedSample(String name) {
+    private RecordedSample(String name, MediaProjection mediaProjection) {
         this.name = name;
         this.volume = 100;
-        this.pitch = 44100;
+        this.pitch = Utils.SAMPLE_RATE_HZ;
         this.play_length = 2;
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
-        this.reRecorder = new Recorder();
+        this.reRecorder = new Recorder(mediaProjection);
         this.isReRecording = false;
     }
 
@@ -191,8 +192,8 @@ class RecordedSample extends Sample {
                 while (isModulatingRandom) {
                     intervalModifier = modulatorSpeed;
                     rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - rangeModifier * 5512;
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
+                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
                     rand = r.nextInt((max - min) + min) + Math.round(min / 2);
                     adjustPitch(rand);
                     try {
@@ -227,8 +228,8 @@ class RecordedSample extends Sample {
                 while (isModulatingSine) {
                     intervalModifier = modulatorSpeed;
                     rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - rangeModifier * 5512;
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
+                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
                     i = pitch;
 
                     if (climbing) {
@@ -276,8 +277,8 @@ class RecordedSample extends Sample {
                 while (isModulatingSaw) {
                     intervalModifier = modulatorSpeed;
                     rangeModifier = modulatorIntensity;
-                    min = rangeModifier * 5512;
-                    max = 88200 - (rangeModifier * 5512);
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
+                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - (rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT);
                     i = pitch;
                     if (i >= max - 10) {
                         adjustPitch(min);
