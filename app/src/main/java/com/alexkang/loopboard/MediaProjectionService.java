@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 
@@ -25,13 +26,13 @@ public class MediaProjectionService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
 
-        if(action.equals(Constants.ACTION.STOPFOREGROUND_ACTION)){
+        if(action.equals(Utils.ACTION.STOPFOREGROUND_ACTION) || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
             stopForeground(true);
             stopSelfResult(startId);
             return START_NOT_STICKY;
         }
 
-        else if(action.equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
+        else if(action.equals(Utils.ACTION.STARTFOREGROUND_ACTION)) {
             String CHANNEL_ID = "loopboard_channel_01";
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
                     "Loopboard channel",

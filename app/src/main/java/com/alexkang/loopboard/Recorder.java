@@ -8,6 +8,7 @@ import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
+import android.os.Build;
 import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -113,13 +114,24 @@ class Recorder {
 
     synchronized void refresh() {
         shutdown();
-        if(mediaProjection == null) {
-            audioRecord = new AudioRecord.Builder()
-                    .setAudioSource(MediaRecorder.AudioSource.MIC)
-                    .setAudioFormat(audioFormat)
-                    .setBufferSizeInBytes(Utils.MIN_BUFFER_SIZE)
-                    .build();
-        } else {
+        if(mediaProjection == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            //Microphone mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                audioRecord = new AudioRecord.Builder()
+                        .setAudioSource(MediaRecorder.AudioSource.MIC)
+                        .setAudioFormat(audioFormat)
+                        .setBufferSizeInBytes(Utils.MIN_BUFFER_SIZE)
+                        .build();
+            } else {
+                audioRecord =
+                        new AudioRecord(
+                                MediaRecorder.AudioSource.MIC,
+                                Utils.SAMPLE_RATE_HZ,
+                                AudioFormat.CHANNEL_IN_MONO,
+                                AudioFormat.ENCODING_PCM_16BIT,
+                                Utils.MIN_BUFFER_SIZE);
+            }
+        } else { // Audio capture mode
             audioRecord = new AudioRecord.Builder()
                     .setAudioPlaybackCaptureConfig(audioPlaybackCaptureConfiguration)
                     .setAudioFormat(audioFormat)
@@ -141,6 +153,8 @@ class Recorder {
     }
 
     private void createAudioPlaybackCaptureConfiguration() {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return;
+
         try {
             AudioPlaybackCaptureConfiguration.Builder audioPlaybackCaptureConfigurationBuilder =
                     new AudioPlaybackCaptureConfiguration.Builder(mediaProjection).addMatchingUsage(AudioAttributes.USAGE_MEDIA);

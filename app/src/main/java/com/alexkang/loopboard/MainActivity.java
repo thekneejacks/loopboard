@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
@@ -59,9 +60,11 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-        mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        }
 
-        checkPermissions();
+        checkPermissions(); //initialize recorder
 
         // Retrieve UI elements.
         ListView sampleList = findViewById(R.id.sound_list);
@@ -69,10 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the sample list.
         sampleList.setAdapter(sampleListAdapter);
-
-        // Initialize recorder
-        //if(canCaptureAudio) recorder = new Recorder(mediaProjection);
-        //else recorder = new Recorder(null);
 
         // Add some footer space at the bottom of the sample list.
         View footer = new View(this);
@@ -208,8 +207,18 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
         }
 
-        Intent intent = mediaProjectionManager.createScreenCaptureIntent();
-        this.startActivityForResult(intent, PERMISSION_REQUEST_CODE);
+
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+            Snackbar.make(
+                    findViewById(R.id.root_layout),
+                    "Internal audio capture requires Android 10 or above.",
+                    Snackbar.LENGTH_SHORT).show();
+            recorder = new Recorder(null); //Microphone mode
+        } else {
+            // create a prompt to ask for permission to capture audio
+            Intent intent = mediaProjectionManager.createScreenCaptureIntent();
+            this.startActivityForResult(intent, PERMISSION_REQUEST_CODE);
+        }
     }
 
     private void updateTutorialVisibility() {
@@ -258,42 +267,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveRecording(byte[] recordedBytes) {
-	    // Initialize the name input field for the sample.
-        /*@SuppressLint("InflateParams") View saveLayout =
-                getLayoutInflater().inflate(R.layout.save_sample_dialog, null);
-        EditText sampleNameField = saveLayout.findViewById(R.id.sample_name_field);
-        sampleNameField.setText(
-                String.format(
-                        Locale.ENGLISH,
-                        "Sample %d",
-                        recordedSamples.size() + 1));
-        sampleNameField.selectAll();
-
-        // Create a new dialog for the user to edit the name, and then save the sample.
-        runOnUiThread(() -> new AlertDialog.Builder(MainActivity.this)
-                .setTitle(getString(R.string.name_recording))
-                .setView(saveLayout)
-                .setPositiveButton(
-                        getString(R.string.save), (dialog, which) -> saveExecutor.execute(() -> {
-                            String name = sampleNameField.getText().toString();
-                            if (Utils.saveRecording(getBaseContext(), name, recordedBytes)) {
-                                runOnUiThread(() -> {
-                                    recordedSamples
-                                            .add(RecordedSample
-                                                    .openSavedSample(this, name));
-                                    sampleListAdapter.notifyDataSetChanged();
-                                    updateTutorialVisibility();
-                                });
-                            } else {
-                                Snackbar.make(
-                                        findViewById(R.id.root_layout),
-                                        R.string.error_saving,
-                                        Snackbar.LENGTH_SHORT).show();
-                            }
-                        }))
-                .setCancelable(false)
-                .show());*/
-
         String name = String.format(Locale.ENGLISH, "Sample %d", recordedSamples.size() + 1);
         if (Utils.saveRecording(getBaseContext(), name, recordedBytes)) {
             runOnUiThread(() -> {
@@ -342,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void reRecordAllSamples() {
-        Boolean doDelay = false; //todo
+        boolean doDelay = false; //todo
         int delay = 250; //todo
 
         Thread reRecordThread = new Thread(() -> {
@@ -402,6 +375,10 @@ public class MainActivity extends AppCompatActivity {
 
     //Audio capture code
     protected void onActivityResult (int requestCode, int resultCode, Intent data){
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+            //should not happen
+            return;
+        }
         if(resultCode == RESULT_CANCELED){
             Snackbar.make(
                     findViewById(R.id.root_layout),
@@ -413,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(resultCode == RESULT_OK){
             Intent startIntent = new Intent(this, MediaProjectionService.class);
-            startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+            startIntent.setAction(Utils.ACTION.STARTFOREGROUND_ACTION);
             ContextCompat.startForegroundService(this,startIntent);
 
              new Handler().postDelayed(() -> {
@@ -439,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopMediaProjectionService(){
         Intent stopIntent = new Intent(MainActivity.this, MediaProjectionService.class);
-        stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+        stopIntent.setAction(Utils.ACTION.STOPFOREGROUND_ACTION);
         startService(stopIntent);
     }
 

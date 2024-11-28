@@ -11,6 +11,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 class Utils {
+    public interface ACTION {
+        String STARTFOREGROUND_ACTION = "com.alexkang.loopboard.MediaProjectionService.action.startforeground";
+        String STOPFOREGROUND_ACTION = "com.alexkang.loopboard.MediaProjectionService.action.stopforeground";
+    }
 
     static final int MAX_SAMPLES = 24;
     static final String IMPORTED_SAMPLE_PATH =
