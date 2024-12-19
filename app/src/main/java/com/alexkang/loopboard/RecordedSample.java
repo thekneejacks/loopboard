@@ -319,6 +319,7 @@ class RecordedSample extends Sample {
         this.stopSawMod();
         this.stopReRecording();
         audioTrack.release();
+        reRecorder.shutdown();
     }
 
     /** Update a recorded sample and save it to disk. */
