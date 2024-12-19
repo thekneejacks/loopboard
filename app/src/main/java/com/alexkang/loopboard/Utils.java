@@ -25,11 +25,16 @@ class Utils {
 
     static final int SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT = SAMPLE_RATE_HZ / 8;
 
-
     static final int MIN_BUFFER_SIZE = AudioRecord.getMinBufferSize(
             SAMPLE_RATE_HZ,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT);
+
+    static final AudioFormat AUDIO_FORMAT = new AudioFormat.Builder()
+            .setSampleRate(Utils.SAMPLE_RATE_HZ)
+            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .build();
 
     private static final String TAG = "Utils";
     private static final String[] IMPORTED_SAMPLE_TYPES = {"wav", "mp3", "mp4", "m4a"};
