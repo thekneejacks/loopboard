@@ -2,6 +2,7 @@ package com.alexkang.loopboard;
 
 
 
+import android.annotation.SuppressLint;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioPlaybackCaptureConfiguration;
@@ -13,35 +14,37 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 class Recorder {
 
     private static final int AUDIO_CUTOFF_LENGTH = (int) (Utils.SAMPLE_RATE_HZ / 3.675);
     private static final int MIN_RECORDING_SIZE = 8000;
     private static final String TAG = "Recorder";
-    //private final MediaProjection mediaProjection;
-
-    private ExecutorService recordExecutor;
+    private final ExecutorService recordExecutor;
     private AudioRecord audioRecord;
-    private final MediaProjection mediaProjection;
+    private MediaProjection mediaProjection;
     private AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
-    private final AudioFormat audioFormat;
+    private static final AudioFormat audioFormat = Utils.AUDIO_FORMAT;
     private volatile boolean isRecording = false;
 
     interface RecorderCallback {
         void onAudioRecorded(byte[] recordedBytes);
     }
 
-    Recorder(MediaProjection mProjection) {
+    Recorder(MediaProjection mProjection, ExecutorService executorService) {
         this.mediaProjection = mProjection;
+        this.recordExecutor = executorService;
         if(mediaProjection != null) createAudioPlaybackCaptureConfiguration();
-        audioFormat = new AudioFormat.Builder()
+        /*audioFormat = new AudioFormat.Builder()
                 .setSampleRate(Utils.SAMPLE_RATE_HZ)
                 .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                .build();
+                .build();*/
         //refresh();
+    }
+
+    synchronized void setMediaProjection(){
+        //todo: toggle between microphone and audio capture modes
     }
 
     synchronized void startRecording(RecorderCallback recorderCallback) {
@@ -52,9 +55,8 @@ class Recorder {
 
         refresh();
 
-
         isRecording = true;
-        recordExecutor.execute(() -> {
+        recordExecutor.submit(() -> {
             try {
                 audioRecord.startRecording();
             } catch (IllegalStateException e) {
@@ -95,8 +97,6 @@ class Recorder {
                 Log.e(TAG, "Error while ending a recording");
             }
         });
-
-
     }
 
     synchronized void stopRecording() {
@@ -108,10 +108,11 @@ class Recorder {
 
         // Mark ourselves as not recording so the ongoing recording knows to stop.
         isRecording = false;
-        // to facilitate multiple recorders, release recordExecutor and audioRecord every time we stop recording
+        // to facilitate multiple recorders, release audioRecord every time we stop recording
         shutdown();
     }
 
+    @SuppressLint("MissingPermission")
     synchronized void refresh() {
         shutdown();
         if(mediaProjection == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -139,7 +140,7 @@ class Recorder {
                     .build();
         }
 
-        recordExecutor = Executors.newSingleThreadExecutor();
+        //recordExecutor = Executors.newSingleThreadExecutor();
 
     }
 
@@ -147,9 +148,9 @@ class Recorder {
         if (audioRecord != null) {
             audioRecord.release();
         }
-        if (recordExecutor != null) {
-            recordExecutor.shutdown();
-        }
+        //if (recordExecutor != null) {
+        //    recordExecutor.shutdown();
+        //}
     }
 
     private void createAudioPlaybackCaptureConfiguration() {

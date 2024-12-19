@@ -9,9 +9,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
-
 import java.util.List;
-import java.util.Random;
+
 
 public class SampleListAdapter extends BaseAdapter {
 
@@ -27,8 +26,6 @@ public class SampleListAdapter extends BaseAdapter {
     private static final int RANDOMIZER_SPEED_SLIDER_MIN = 1;
     private static final int RANDOMIZER_INTENSITY_SLIDER_MAX = 7;
     private static final int RANDOMIZER_INTENSITY_SLIDER_MIN = 0;
-
-    Random r;
 
     SampleListAdapter(
             Context context,
@@ -86,7 +83,7 @@ public class SampleListAdapter extends BaseAdapter {
         SeekBar modulatorSpeedSlider = convertView.findViewById(R.id.randomizer_speed_slider);
         SeekBar modulatorIntensitySlider = convertView.findViewById(R.id.randomizer_intensity_slider);
         //randomizerHandler = new Handler();
-        r = new Random();
+        //r = new Random();
 
 
         // Choose which buttons to show.
