@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 
 class RecordedSample extends Sample {
 
@@ -24,6 +25,7 @@ class RecordedSample extends Sample {
     private int volume;
     private int pitch;
     private int play_length;
+    private final ExecutorService modulatorExecutor;
     private int modulatorSpeed;
     private int modulatorIntensity;
     private boolean isLooping;
@@ -41,7 +43,7 @@ class RecordedSample extends Sample {
      *
      * @return A sample object ready to be played, or null if an error occurred.
      */
-    static RecordedSample openSavedSample(Context context, String fileName, MediaProjection mediaProjection) {
+    static RecordedSample openSavedSample(Context context, String fileName, MediaProjection mediaProjection, ExecutorService executorService) {
         try {
             // Read the file into bytes.
             FileInputStream input = context.openFileInput(fileName);
@@ -51,7 +53,7 @@ class RecordedSample extends Sample {
 
             // Make sure we actually read all the bytes.
             if (bytesRead == output.length) {
-                RecordedSample recordedSample = new RecordedSample(fileName,mediaProjection);
+                RecordedSample recordedSample = new RecordedSample(fileName,mediaProjection,executorService);
                 recordedSample.loadNewSample(output);
                 return recordedSample;
             }
@@ -65,14 +67,15 @@ class RecordedSample extends Sample {
         return null;
     }
 
-    private RecordedSample(String name, MediaProjection mediaProjection) {
+    private RecordedSample(String name, MediaProjection mediaProjection, ExecutorService executorService) {
         this.name = name;
         this.volume = 100;
         this.pitch = Utils.SAMPLE_RATE_HZ;
         this.play_length = 2;
+        this.modulatorExecutor = executorService;
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
-        this.reRecorder = new Recorder(mediaProjection);
+        this.reRecorder = new Recorder(mediaProjection, executorService);
         this.isReRecording = false;
     }
 
@@ -180,7 +183,7 @@ class RecordedSample extends Sample {
             return;
         }
         this.isModulatingRandom = true;
-        Thread randomModThread = new Thread(new Runnable() {
+        modulatorExecutor.submit(new Runnable() {
             int intervalModifier;
             int rangeModifier;
             int min;
@@ -204,8 +207,6 @@ class RecordedSample extends Sample {
                 }
             }
         });
-        randomModThread.start();
-
     }
 
     @Override
@@ -215,7 +216,7 @@ class RecordedSample extends Sample {
             return;
         }
         this.isModulatingSine = true;
-        Thread sineModThread = new Thread(new Runnable() {
+        modulatorExecutor.submit(new Runnable() {
             boolean climbing = true;
             int intervalModifier;
             int rangeModifier;
@@ -255,7 +256,6 @@ class RecordedSample extends Sample {
                 }
             }
         });
-        sineModThread.start();
     }
 
     @Override
@@ -265,7 +265,7 @@ class RecordedSample extends Sample {
             return;
         }
         this.isModulatingSaw = true;
-        Thread sawModThread = new Thread(new Runnable() {
+        modulatorExecutor.submit(new Runnable() {
             int intervalModifier;
             int rangeModifier;
             int min;
@@ -293,7 +293,6 @@ class RecordedSample extends Sample {
                 }
             }
         });
-        sawModThread.start();
     }
 
     @Override

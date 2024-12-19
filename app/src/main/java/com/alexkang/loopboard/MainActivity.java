@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,22 +49,23 @@ public class MainActivity extends AppCompatActivity {
     private Recorder recorder;
     private final SampleListAdapter sampleListAdapter =
             new SampleListAdapter(this, recordedSamples);
-    private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor();
     private MediaProjectionManager mediaProjectionManager;
     private MediaProjection mediaProjection;
+    private ExecutorService executorService;
 
 
     // ------- Activity lifecycle methods -------
 
     @Override
-	@SuppressLint("ClickableViewAccessibility")
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @SuppressLint("ClickableViewAccessibility")
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         }
 
+        executorService = Executors.newCachedThreadPool();
         checkPermissions(); //initialize recorder
 
         // Retrieve UI elements.
@@ -91,10 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Make sure we haven't hit our maximum number of recordings before proceeding.
                 if (recordedSamples.size() > Utils.MAX_SAMPLES) {
-                    Snackbar.make(
-                            findViewById(R.id.root_layout),
-                            R.string.error_max_samples,
-                            Snackbar.LENGTH_SHORT).show();
+                    displaySnackbarDialog("Cannot create any more samples");
                 } else {
                     recorder.startRecording(recordedBytes -> saveRecording(recordedBytes));
                 }
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
-	}
+    }
 
     @Override
     public void onStart() {
@@ -114,10 +113,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-	public void onPause() {
-		super.onPause();
+    public void onPause() {
+        super.onPause();
         //stopAllSamples();
-	}
+    }
 
     @Override
     public void onDestroy() {
@@ -128,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         stopMediaProjectionService();
 
         recorder.shutdown();
-        saveExecutor.shutdown();
+        executorService.shutdown();
     }
 
     @Override
@@ -168,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode != PERMISSION_REQUEST_CODE || grantResults.length != PERMISSIONS.length) {
             return;
         }
@@ -209,11 +209,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
-            Snackbar.make(
-                    findViewById(R.id.root_layout),
-                    "Internal audio capture requires Android 10 or above.",
-                    Snackbar.LENGTH_SHORT).show();
-            recorder = new Recorder(null); //Microphone mode
+            displaySnackbarDialog("Internal audio capture requires Android 10 or above.");
+            recorder = new Recorder(null,executorService); //Microphone mode
         } else {
             // create a prompt to ask for permission to capture audio
             Intent intent = mediaProjectionManager.createScreenCaptureIntent();
@@ -255,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
         //for (String x: samplesList) Log.d("debug:",x);
         for (String x : samplesList) {
             //Log.d("debug",x);
-            RecordedSample recordedSample = RecordedSample.openSavedSample(this, x, mediaProjection);
+            RecordedSample recordedSample = RecordedSample.openSavedSample(this, x, mediaProjection,executorService);
             if (recordedSample != null) {
                 recordedSamples.add(recordedSample);
             }
@@ -272,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 recordedSamples
                         .add(RecordedSample
-                                .openSavedSample(this, name, mediaProjection));
+                                .openSavedSample(this, name, mediaProjection,executorService));
                 Collections.sort(recordedSamples, (e1, e2) -> e1.getName().compareTo(e2.getName()));
                 //Log.d("debug:","now if you'll excuse me...");
                 //for (RecordedSample x: recordedSamples) Log.d("debug:",x.getName());
@@ -280,10 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 updateTutorialVisibility();
             });
         } else {
-            Snackbar.make(
-                    findViewById(R.id.root_layout),
-                    R.string.error_saving,
-                    Snackbar.LENGTH_SHORT).show();
+            displaySnackbarDialog("An error occurred while saving");
         }
 
 
@@ -356,8 +350,8 @@ public class MainActivity extends AppCompatActivity {
         recordedSamples.clear();
     }
 
-	private void deleteAllRecordings() {
-	    // Stop playing all samples.
+    private void deleteAllRecordings() {
+        // Stop playing all samples.
         shutdownSamples();
 
         // Delete all recordings.
@@ -367,51 +361,51 @@ public class MainActivity extends AppCompatActivity {
 
         // Update the UI.
         refreshRecordings();
-        Snackbar.make(
-                findViewById(R.id.root_layout),
-                R.string.samples_deleted,
-                Snackbar.LENGTH_SHORT).show();
-	}
+        displaySnackbarDialog("All recorded samples removed");
+    }
 
     //Audio capture code
-    protected void onActivityResult (int requestCode, int resultCode, Intent data){
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             //should not happen
             return;
         }
-        if(resultCode == RESULT_CANCELED){
-            Snackbar.make(
-                    findViewById(R.id.root_layout),
-                    "Audio capture not granted. Switching to Microphone mode.",
-                    Snackbar.LENGTH_SHORT).show();
-
+        if (resultCode == RESULT_CANCELED) {
+            displaySnackbarDialog("Audio capture not granted. Switching to Microphone mode.");
             //mediaProjection is null; recorder will automatically use microphone
-            recorder = new Recorder(null);
-        }
-        else if(resultCode == RESULT_OK){
-            Intent startIntent = new Intent(this, MediaProjectionService.class);
-            startIntent.setAction(Utils.ACTION.STARTFOREGROUND_ACTION);
-            ContextCompat.startForegroundService(this,startIntent);
+            recorder = new Recorder(null, executorService);
 
-             new Handler().postDelayed(() -> {
-                if (isMyServiceRunning()){
+        } else if (resultCode == RESULT_OK) {
+            startMediaProjectionService();
+
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isMyServiceRunning()) {
                     mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data);
-                    if(mediaProjection != null){
-                        Snackbar.make(
-                                findViewById(R.id.root_layout),
-                                "Audio capture granted.",
-                                Snackbar.LENGTH_SHORT).show();
-                        recorder = new Recorder(mediaProjection);
+                    if (mediaProjection != null) {
+                        displaySnackbarDialog("Audio capture granted.");
+                        recorder = new Recorder(mediaProjection, executorService);
                     } else {
-                        Snackbar.make(
-                                findViewById(R.id.root_layout),
-                                "Failed to grant audio capture. falling back to Microphone mode.",
-                                Snackbar.LENGTH_SHORT).show();
-                        recorder = new Recorder(null);
+                        displaySnackbarDialog("Failed to grant audio capture. falling back to Microphone mode.");
+                        recorder = new Recorder(null, executorService);
                     }
                 }
             }, 200);
         }
+    }
+
+    private void displaySnackbarDialog(String text){
+        Snackbar.make(
+                findViewById(R.id.root_layout),
+                text,
+                Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void startMediaProjectionService(){
+        Intent startIntent = new Intent(this, MediaProjectionService.class);
+        //Intent startIntent = getIntent();
+        startIntent.setAction(Utils.ACTION.STARTFOREGROUND_ACTION);
+        ContextCompat.startForegroundService(this, startIntent);
     }
 
     private void stopMediaProjectionService(){
