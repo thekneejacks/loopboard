@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioTrack;
 import android.media.projection.MediaProjection;
 import android.util.Log;
@@ -43,7 +44,7 @@ class RecordedSample extends Sample {
      *
      * @return A sample object ready to be played, or null if an error occurred.
      */
-    static RecordedSample openSavedSample(Context context, String fileName, MediaProjection mediaProjection, ExecutorService executorService) {
+    static RecordedSample openSavedSample(Context context, String fileName, AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration, ExecutorService executorService, boolean isCapturingAudio) {
         try {
             // Read the file into bytes.
             FileInputStream input = context.openFileInput(fileName);
@@ -53,7 +54,7 @@ class RecordedSample extends Sample {
 
             // Make sure we actually read all the bytes.
             if (bytesRead == output.length) {
-                RecordedSample recordedSample = new RecordedSample(fileName,mediaProjection,executorService);
+                RecordedSample recordedSample = new RecordedSample(fileName,audioPlaybackCaptureConfiguration,executorService,isCapturingAudio);
                 recordedSample.loadNewSample(output);
                 return recordedSample;
             }
@@ -67,7 +68,7 @@ class RecordedSample extends Sample {
         return null;
     }
 
-    private RecordedSample(String name, MediaProjection mediaProjection, ExecutorService executorService) {
+    private RecordedSample(String name, AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration, ExecutorService executorService, boolean isCapturingAudio) {
         this.name = name;
         this.volume = 100;
         this.pitch = Utils.SAMPLE_RATE_HZ;
@@ -75,7 +76,7 @@ class RecordedSample extends Sample {
         this.modulatorExecutor = executorService;
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
-        this.reRecorder = new Recorder(mediaProjection, executorService);
+        this.reRecorder = new Recorder(audioPlaybackCaptureConfiguration, executorService, isCapturingAudio);
         this.isReRecording = false;
     }
 
@@ -309,7 +310,10 @@ class RecordedSample extends Sample {
     synchronized void stopSawMod() {
         this.isModulatingSaw = false;
     }
-
+    @Override
+    synchronized void setIsCapturingAudio(boolean t){
+        reRecorder.setIsCapturingAudio(t);
+    }
     @Override
     synchronized void shutdown() {
         //Stop all modulations

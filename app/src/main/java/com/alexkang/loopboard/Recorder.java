@@ -1,7 +1,6 @@
 package com.alexkang.loopboard;
 
 
-
 import android.annotation.SuppressLint;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
@@ -11,6 +10,7 @@ import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -22,29 +22,27 @@ class Recorder {
     private static final String TAG = "Recorder";
     private final ExecutorService recordExecutor;
     private AudioRecord audioRecord;
-    private MediaProjection mediaProjection;
-    private AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
+    private final AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
     private static final AudioFormat audioFormat = Utils.AUDIO_FORMAT;
     private volatile boolean isRecording = false;
+    private volatile boolean isCapturingAudio = false;
 
     interface RecorderCallback {
         void onAudioRecorded(byte[] recordedBytes);
     }
 
-    Recorder(MediaProjection mProjection, ExecutorService executorService) {
-        this.mediaProjection = mProjection;
+    Recorder(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration, ExecutorService executorService, Boolean isCapturingAudio) {
+        this.audioPlaybackCaptureConfiguration = audioPlaybackCaptureConfiguration;
         this.recordExecutor = executorService;
-        if(mediaProjection != null) createAudioPlaybackCaptureConfiguration();
-        /*audioFormat = new AudioFormat.Builder()
-                .setSampleRate(Utils.SAMPLE_RATE_HZ)
-                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                .build();*/
-        //refresh();
+        this.isCapturingAudio = isCapturingAudio;
     }
 
-    synchronized void setMediaProjection(){
-        //todo: toggle between microphone and audio capture modes
+    synchronized boolean getIsCapturingAudio() {
+        return this.isCapturingAudio;
+    }
+
+    synchronized void setIsCapturingAudio(boolean t) {
+        this.isCapturingAudio = t;
     }
 
     synchronized void startRecording(RecorderCallback recorderCallback) {
@@ -70,11 +68,9 @@ class Recorder {
 
             // Remove a small first chunk of the recording to avoid the sound of the user tapping
             // the button.
+            audioRecord.read(
+                    new byte[AUDIO_CUTOFF_LENGTH], 0, AUDIO_CUTOFF_LENGTH);
 
-            if(mediaProjection == null) { // but only when we're using the microphone
-                audioRecord.read(
-                        new byte[AUDIO_CUTOFF_LENGTH], 0, AUDIO_CUTOFF_LENGTH);
-            }
 
             // Keep recording until stopRecording() is invoked.
             while (isRecording) {
@@ -115,7 +111,7 @@ class Recorder {
     @SuppressLint("MissingPermission")
     synchronized void refresh() {
         shutdown();
-        if(mediaProjection == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        if (!isCapturingAudio || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || audioPlaybackCaptureConfiguration == null) {
             //Microphone mode
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 audioRecord = new AudioRecord.Builder()
@@ -152,19 +148,4 @@ class Recorder {
         //    recordExecutor.shutdown();
         //}
     }
-
-    private void createAudioPlaybackCaptureConfiguration() {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return;
-
-        try {
-            AudioPlaybackCaptureConfiguration.Builder audioPlaybackCaptureConfigurationBuilder =
-                    new AudioPlaybackCaptureConfiguration.Builder(mediaProjection).addMatchingUsage(AudioAttributes.USAGE_MEDIA);
-            audioPlaybackCaptureConfiguration =
-                    audioPlaybackCaptureConfigurationBuilder.build();
-        } catch (Exception e) {
-            Log.e(TAG, "createAudioPlaybackCaptureConfiguration: Error:", e);
-            e.printStackTrace();
-        }
-    }
-
 }

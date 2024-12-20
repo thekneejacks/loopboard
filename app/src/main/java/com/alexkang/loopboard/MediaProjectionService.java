@@ -45,7 +45,8 @@ public class MediaProjectionService extends Service {
                     .setContentText("").build();
 
             startForeground(1, notification);
-            return super.onStartCommand(intent, flags, startId);
+            //return super.onStartCommand(intent, flags, startId);
+            return START_REDELIVER_INTENT;
         }
 
         return START_STICKY;

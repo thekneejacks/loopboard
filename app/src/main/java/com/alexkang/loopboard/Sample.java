@@ -2,6 +2,7 @@ package com.alexkang.loopboard;
 
 
 import android.content.Context;
+import android.media.projection.MediaProjection;
 
 abstract class Sample {
 
@@ -44,6 +45,8 @@ abstract class Sample {
     abstract void stopSineMod();
 
     abstract void stopSawMod();
+
+    abstract void setIsCapturingAudio(boolean t);
 
     abstract void shutdown();
 

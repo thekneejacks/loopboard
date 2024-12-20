@@ -21,4 +21,14 @@
         android:icon="@drawable/ic_launcher"
         android:title="@string/start_re_recording_on_all_samples"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_switchToMicrophoneMode"
+        android:icon="@drawable/ic_launcher"
+        android:title="@string/switch_to_microphone_mode"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_switchToAudioCaptureMode"
+        android:icon="@drawable/ic_launcher"
+        android:title="@string/switch_to_audio_capture_mode"
+        app:showAsAction="never" />
 </menu>
