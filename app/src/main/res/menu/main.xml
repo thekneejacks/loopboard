@@ -31,4 +31,9 @@
         android:icon="@drawable/ic_launcher"
         android:title="@string/switch_to_audio_capture_mode"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_grantAudioCapture"
+        android:icon="@drawable/ic_launcher"
+        android:title="@string/grant_audio_capture_permission"
+        app:showAsAction="never" />
 </menu>

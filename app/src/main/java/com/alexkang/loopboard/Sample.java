@@ -2,6 +2,7 @@ package com.alexkang.loopboard;
 
 
 import android.content.Context;
+import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.projection.MediaProjection;
 
 abstract class Sample {
@@ -47,6 +48,8 @@ abstract class Sample {
     abstract void stopSawMod();
 
     abstract void setIsCapturingAudio(boolean t);
+
+    abstract void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration);
 
     abstract void shutdown();
 

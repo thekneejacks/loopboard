@@ -31,5 +31,6 @@
     <string name="start_re_recording_on_all_samples">Start re-recording on all samples</string>
     <string name="switch_to_microphone_mode">Switch to Microphone mode</string>
     <string name="switch_to_audio_capture_mode">Switch to Audio Capture mode</string>
+    <string name="grant_audio_capture_permission">Grant Audio Capture permission</string>
 
 </resources>

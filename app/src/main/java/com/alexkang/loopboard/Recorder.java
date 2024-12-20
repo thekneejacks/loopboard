@@ -22,7 +22,7 @@ class Recorder {
     private static final String TAG = "Recorder";
     private final ExecutorService recordExecutor;
     private AudioRecord audioRecord;
-    private final AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
+    private AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
     private static final AudioFormat audioFormat = Utils.AUDIO_FORMAT;
     private volatile boolean isRecording = false;
     private volatile boolean isCapturingAudio = false;
@@ -43,6 +43,10 @@ class Recorder {
 
     synchronized void setIsCapturingAudio(boolean t) {
         this.isCapturingAudio = t;
+    }
+
+    synchronized void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration){
+        this.audioPlaybackCaptureConfiguration = audioPlaybackCaptureConfiguration;
     }
 
     synchronized void startRecording(RecorderCallback recorderCallback) {

@@ -169,12 +169,14 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(id == R.id.action_switchToMicrophoneMode){
             switchToMicrophoneMode();
-            displaySnackbarDialog("Switching to Microphone mode.");
             return true;
         }
         else if(id == R.id.action_switchToAudioCaptureMode){
             switchToAudioCaptureMode();
-            displaySnackbarDialog("Switching to Audio Capture mode.");
+            return true;
+        }
+        else if(id == R.id.action_grantAudioCapture){
+            grantAudioCapture();
             return true;
         }
         return true;
@@ -230,8 +232,7 @@ public class MainActivity extends AppCompatActivity {
             hideSwitchButtons();
         } else {
             // create a prompt to ask for permission to capture audio
-            Intent intent = mediaProjectionManager.createScreenCaptureIntent();
-            this.startActivityForResult(intent, PERMISSION_REQUEST_CODE);
+            grantAudioCapture();
         }
     }
 
@@ -384,15 +385,21 @@ public class MainActivity extends AppCompatActivity {
     //Audio capture code
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(recorder != null) recorder.shutdown();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             //should not happen
             return;
         }
         if (resultCode == RESULT_CANCELED) {
-            displaySnackbarDialog("Audio capture not granted. Switching to Microphone mode.");
+            displaySnackbarDialog("Audio capture not granted. Switching to Microphone only mode.");
             //mediaProjection is null; recorder will automatically use microphone
             recorder = new Recorder(getAudioPlaybackCaptureConfiguration(),executorService,false);
+            for(Sample sample : recordedSamples){
+                sample.setAudioPlaybackCaptureConfiguration(getAudioPlaybackCaptureConfiguration());
+                sample.setIsCapturingAudio(false);
+            }
             hideSwitchButtons();
+            
         }
         else if (resultCode == RESULT_OK) {
             startMediaProjectionService();
@@ -402,9 +409,17 @@ public class MainActivity extends AppCompatActivity {
                     if (mediaProjection != null) {
                         displaySnackbarDialog("Audio capture granted.");
                         recorder = new Recorder(getAudioPlaybackCaptureConfiguration(),executorService,true);
+                        for(Sample sample : recordedSamples){
+                            sample.setAudioPlaybackCaptureConfiguration(getAudioPlaybackCaptureConfiguration());
+                            sample.setIsCapturingAudio(true);
+                        }
                     } else {
                         displaySnackbarDialog("Failed to grant audio capture. falling back to Microphone mode.");
                         recorder = new Recorder(getAudioPlaybackCaptureConfiguration(),executorService,false);
+                        for(Sample sample : recordedSamples){
+                            sample.setAudioPlaybackCaptureConfiguration(getAudioPlaybackCaptureConfiguration());
+                            sample.setIsCapturingAudio(false);
+                        }
                     }
 
                     hideSwitchButtons();
@@ -443,6 +458,7 @@ public class MainActivity extends AppCompatActivity {
         }
         recorder.setIsCapturingAudio(false);
         hideSwitchButtons();
+        displaySnackbarDialog("Switching to Microphone mode.");
     }
 
     private void switchToAudioCaptureMode(){
@@ -452,44 +468,56 @@ public class MainActivity extends AppCompatActivity {
 
         for (Sample sample : recordedSamples) {
             sample.setIsCapturingAudio(true); //Audio Capture Mode
-        };
+        }
         recorder.setIsCapturingAudio(true);
         hideSwitchButtons();
+        displaySnackbarDialog("Switching to Audio Capture mode.");
+    }
+
+    private void grantAudioCapture(){
+        Intent intent = mediaProjectionManager.createScreenCaptureIntent();
+        this.startActivityForResult(intent, PERMISSION_REQUEST_CODE);
     }
 
     private void hideSwitchButtons(){
         MenuItem microphone = topRightMenu.findItem(R.id.action_switchToMicrophoneMode);
         MenuItem audioCapture = topRightMenu.findItem(R.id.action_switchToAudioCaptureMode);
+        MenuItem grantAudioCapture = topRightMenu.findItem(R.id.action_grantAudioCapture);
 
-        if(mediaProjection == null){
-            //User did not grant permission to capture audio; no switching capability
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+            //No audio capture capability; no switch or grant permission buttons
             microphone.setVisible(false);
             audioCapture.setVisible(false);
+            grantAudioCapture.setVisible(false);
+            isAudioCaptureMode = false;
+        }
+        else if(mediaProjection == null){
+            //User did not grant permission to capture audio; hide switch buttons, show button to ask for permission
+            microphone.setVisible(false);
+            audioCapture.setVisible(false);
+            grantAudioCapture.setVisible(true);
             isAudioCaptureMode = false;
         }
         else if(!recorder.getIsCapturingAudio()){
             //User has switched to microphone mode; hide switch to microphone mode button
             microphone.setVisible(false);
             audioCapture.setVisible(true);
+            grantAudioCapture.setVisible(false);
             isAudioCaptureMode = false;
         }
         else {
             //User has switched to audio capture mode; hide switch to audio capture mode button
             microphone.setVisible(true);
             audioCapture.setVisible(false);
+            grantAudioCapture.setVisible(false);
             isAudioCaptureMode = true;
         }
         invalidateOptionsMenu();
     }
 
-    private MediaProjection getMediaProjection(){
-        if (isAudioCaptureMode) {return mediaProjection;}
-        else return null;
-    }
-
     private AudioPlaybackCaptureConfiguration getAudioPlaybackCaptureConfiguration() {
         AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration = null;
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null;
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || mediaProjection == null) return null;
         try {
             AudioPlaybackCaptureConfiguration.Builder audioPlaybackCaptureConfigurationBuilder =
                     new AudioPlaybackCaptureConfiguration.Builder(mediaProjection).addMatchingUsage(AudioAttributes.USAGE_MEDIA);

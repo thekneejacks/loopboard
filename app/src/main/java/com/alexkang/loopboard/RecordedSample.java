@@ -6,7 +6,6 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioTrack;
-import android.media.projection.MediaProjection;
 import android.util.Log;
 
 import java.io.File;
@@ -313,6 +312,10 @@ class RecordedSample extends Sample {
     @Override
     synchronized void setIsCapturingAudio(boolean t){
         reRecorder.setIsCapturingAudio(t);
+    }
+    @Override
+    synchronized void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration){
+        this.reRecorder.setAudioPlaybackCaptureConfiguration(audioPlaybackCaptureConfiguration);
     }
     @Override
     synchronized void shutdown() {
