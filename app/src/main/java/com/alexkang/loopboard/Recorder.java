@@ -1,7 +1,10 @@
 package com.alexkang.loopboard;
 
 
+import static android.app.PendingIntent.getActivity;
+
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioPlaybackCaptureConfiguration;
@@ -31,9 +34,9 @@ class Recorder {
         void onAudioRecorded(byte[] recordedBytes);
     }
 
-    Recorder(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration, ExecutorService executorService, Boolean isCapturingAudio) {
-        this.audioPlaybackCaptureConfiguration = audioPlaybackCaptureConfiguration;
-        this.recordExecutor = executorService;
+    Recorder(Context context, Boolean isCapturingAudio) {
+        this.audioPlaybackCaptureConfiguration = LoopboardApplication.getApplication(context).getAudioPlaybackCaptureConfiguration();
+        this.recordExecutor = LoopboardApplication.getApplication(context).getExecutorService();
         this.isCapturingAudio = isCapturingAudio;
     }
 
@@ -45,8 +48,8 @@ class Recorder {
         this.isCapturingAudio = t;
     }
 
-    synchronized void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration){
-        this.audioPlaybackCaptureConfiguration = audioPlaybackCaptureConfiguration;
+    synchronized void setAudioPlaybackCaptureConfiguration(Context context){
+        this.audioPlaybackCaptureConfiguration = LoopboardApplication.getApplication(context).getAudioPlaybackCaptureConfiguration();
     }
 
     synchronized void startRecording(RecorderCallback recorderCallback) {

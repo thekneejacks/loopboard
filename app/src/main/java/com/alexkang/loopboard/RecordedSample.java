@@ -1,10 +1,11 @@
 package com.alexkang.loopboard;
 
+import static android.app.PendingIntent.getActivity;
+
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioTrack;
 import android.util.Log;
 
@@ -43,7 +44,7 @@ class RecordedSample extends Sample {
      *
      * @return A sample object ready to be played, or null if an error occurred.
      */
-    static RecordedSample openSavedSample(Context context, String fileName, AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration, ExecutorService executorService, boolean isCapturingAudio) {
+    static RecordedSample openSavedSample(Context context, String fileName, boolean isCapturingAudio) {
         try {
             // Read the file into bytes.
             FileInputStream input = context.openFileInput(fileName);
@@ -53,7 +54,7 @@ class RecordedSample extends Sample {
 
             // Make sure we actually read all the bytes.
             if (bytesRead == output.length) {
-                RecordedSample recordedSample = new RecordedSample(fileName,audioPlaybackCaptureConfiguration,executorService,isCapturingAudio);
+                RecordedSample recordedSample = new RecordedSample(fileName,context,isCapturingAudio);
                 recordedSample.loadNewSample(output);
                 return recordedSample;
             }
@@ -67,15 +68,15 @@ class RecordedSample extends Sample {
         return null;
     }
 
-    private RecordedSample(String name, AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration, ExecutorService executorService, boolean isCapturingAudio) {
+    private RecordedSample(String name, Context context, boolean isCapturingAudio) {
         this.name = name;
         this.volume = 100;
         this.pitch = Utils.SAMPLE_RATE_HZ;
         this.play_length = 2;
-        this.modulatorExecutor = executorService;
+        this.modulatorExecutor = LoopboardApplication.getApplication(context).getExecutorService();
         this.modulatorSpeed = 1;
         this.modulatorIntensity = 0;
-        this.reRecorder = new Recorder(audioPlaybackCaptureConfiguration, executorService, isCapturingAudio);
+        this.reRecorder = new Recorder(context,isCapturingAudio);
         this.isReRecording = false;
     }
 
@@ -314,8 +315,8 @@ class RecordedSample extends Sample {
         reRecorder.setIsCapturingAudio(t);
     }
     @Override
-    synchronized void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration){
-        this.reRecorder.setAudioPlaybackCaptureConfiguration(audioPlaybackCaptureConfiguration);
+    synchronized void setAudioPlaybackCaptureConfiguration(Context context){
+        this.reRecorder.setAudioPlaybackCaptureConfiguration(context);
     }
     @Override
     synchronized void shutdown() {

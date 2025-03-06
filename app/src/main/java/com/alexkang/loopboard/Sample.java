@@ -49,7 +49,7 @@ abstract class Sample {
 
     abstract void setIsCapturingAudio(boolean t);
 
-    abstract void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration);
+    abstract void setAudioPlaybackCaptureConfiguration(Context context);
 
     abstract void shutdown();
 
