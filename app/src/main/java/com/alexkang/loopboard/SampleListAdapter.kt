@@ -1,239 +1,232 @@
-package com.alexkang.loopboard;
+package com.alexkang.loopboard
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.os.Build;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.SeekBar;
-import java.util.List;
+import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.CheckBox
+import android.widget.CompoundButton
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
 
-
-public class SampleListAdapter extends BaseAdapter {
-
-    private final Context context;
-    private final List<RecordedSample> recordedSamples;
-
-    private static final int VOLUME_SLIDER_MAX = 100;
-    private static final int PITCH_SLIDER_MAX = Utils.SAMPLE_RATE_HZ_TIMES_TWO;
-    private static final int PITCH_SLIDER_MIN = 1;
-    private static final int PLAY_LENGTH_SLIDER_MAX = 100;
-    private static final int PLAY_LENGTH_SLIDER_MIN = 2;
-    private static final int RANDOMIZER_SPEED_SLIDER_MAX = 200;
-    private static final int RANDOMIZER_SPEED_SLIDER_MIN = 1;
-    private static final int RANDOMIZER_INTENSITY_SLIDER_MAX = 7;
-    private static final int RANDOMIZER_INTENSITY_SLIDER_MIN = 0;
-
-    SampleListAdapter(
-            Context context,
-            List<RecordedSample> recordedSamples) {
-        this.context = context;
-        this.recordedSamples = recordedSamples;
-    }
-
-    @Override
+class SampleListAdapter internal constructor(
+    private val context: Context,
+    private val recordedSamples: List<RecordedSample>
+) : BaseAdapter() {
     //public int getCount() {return importedSamples.size() + recordedSamples.size();}
-    public int getCount() { return recordedSamples.size(); }
+    override fun getCount(): Int {
+        return recordedSamples.size
+    }
 
 
-    @Override
-    public Sample getItem(int position) {
-        if (position < recordedSamples.size()) {
-            return recordedSamples.get(position);
+    override fun getItem(position: Int): RecordedSample? {
+        return if (position < recordedSamples.size) {
+            recordedSamples[position]
         } else {
-            return null;
+            null
         }
     }
 
-    @Override
-    public long getItemId(int position) {
-        return position;
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
     }
 
 
-    @Override
     @SuppressLint("ClickableViewAccessibility")
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        Sample sample = getItem(position);
-        if (sample == null) {
-            return convertView;
-        }
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        var convertView = convertView
+        val sample = getItem(position) ?: return convertView!!
 
         if (convertView == null) {
             convertView =
-                    LayoutInflater
-                            .from(context)
-                            .inflate(R.layout.sound_clip_row, parent, false);
+                LayoutInflater
+                    .from(context)
+                    .inflate(R.layout.sound_clip_row, parent, false)
         }
 
         //Button stopButton = convertView.findViewById(R.id.stop);
-        CheckBox rerecordButton = convertView.findViewById(R.id.rerecord);
-        CheckBox octaveButton = convertView.findViewById(R.id.octave);
-        CheckBox loopButton = convertView.findViewById(R.id.loop);
-        CheckBox randomModButton = convertView.findViewById(R.id.randomizer);
-        CheckBox sineModButton = convertView.findViewById(R.id.sine);
-        CheckBox sawModButton = convertView.findViewById(R.id.saw);
+        val rerecordButton = convertView!!.findViewById<CheckBox>(R.id.rerecord)
+        val octaveButton = convertView.findViewById<CheckBox>(R.id.octave)
+        val loopButton = convertView.findViewById<CheckBox>(R.id.loop)
+        val randomModButton = convertView.findViewById<CheckBox>(R.id.randomizer)
+        val sineModButton = convertView.findViewById<CheckBox>(R.id.sine)
+        val sawModButton = convertView.findViewById<CheckBox>(R.id.saw)
         //Button playButton = convertView.findViewById(R.id.play);
-        SeekBar volumeSlider = convertView.findViewById(R.id.volume_slider);
-        SeekBar pitchSlider = convertView.findViewById(R.id.pitch_slider);
-        SeekBar lengthSlider = convertView.findViewById(R.id.length_slider);
-        SeekBar modulatorSpeedSlider = convertView.findViewById(R.id.randomizer_speed_slider);
-        SeekBar modulatorIntensitySlider = convertView.findViewById(R.id.randomizer_intensity_slider);
+        val volumeSlider = convertView.findViewById<SeekBar>(R.id.volume_slider)
+        val pitchSlider = convertView.findViewById<SeekBar>(R.id.pitch_slider)
+        val lengthSlider = convertView.findViewById<SeekBar>(R.id.length_slider)
+        val modulatorSpeedSlider = convertView.findViewById<SeekBar>(R.id.randomizer_speed_slider)
+        val modulatorIntensitySlider =
+            convertView.findViewById<SeekBar>(R.id.randomizer_intensity_slider)
+
+
         //randomizerHandler = new Handler();
         //r = new Random();
 
 
         // Choose which buttons to show.
-        rerecordButton.setVisibility(View.VISIBLE);
-
+        rerecordButton.visibility = View.VISIBLE
 
 
         //__________________________________________________________Buttons__________________________________________________________
 
         //Button Initialization
-        rerecordButton.setChecked(sample.isReRecording());
-        loopButton.setChecked(sample.isLooping());
-        octaveButton.setChecked(sample.isHighOctave());
-        randomModButton.setChecked(sample.isModulatingRandom());
-        sineModButton.setChecked(sample.isModulatingSine());
-        sawModButton.setChecked(sample.isModulatingSaw());
+        rerecordButton.isChecked = sample.isReRecording
+        loopButton.isChecked = sample.isLooping
+        octaveButton.isChecked = sample.isHighOctave()
+        randomModButton.isChecked = sample.isModulatingRandom
+        sineModButton.isChecked = sample.isModulatingSine
+        sawModButton.isChecked = sample.isModulatingSaw
 
         //Rerecord button
-        rerecordButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        rerecordButton.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
-                sample.startReRecording(context);
+                sample.startReRecording(context)
             } else {
-                sample.stopReRecording();
-                loopButton.setChecked(false);
+                sample.stopReRecording()
+                loopButton.isChecked = false
             }
-        });
+        }
 
         //Loop(Play) Button
-        loopButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sample.adjustVolume(volumeSlider.getProgress());
-            sample.adjustPitch(pitchSlider.getProgress());
+        loopButton.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+            sample.adjustVolume(volumeSlider.progress)
+            sample.adjustPitch(pitchSlider.progress)
             if (isChecked) {
-                sample.play(true);
+                sample.play(true)
             } else {
-                sample.stop();
+                sample.stop()
             }
-        });
+        }
 
         //Octave Toggle Button
-        octaveButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sample.setHighOctave(isChecked);
-        });
+        octaveButton.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+            sample.setHighOctave(isChecked)
+        }
 
 
         //Random Pitch Modulation Button
-        randomModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        randomModButton.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
-                sample.startRandomMod();
+                sample.startRandomMod()
             } else {
-                sample.stopRandomMod();
-                sample.adjustPitch(pitchSlider.getProgress());
+                sample.stopRandomMod()
+                sample.adjustPitch(pitchSlider.progress)
             }
-        });
+        }
 
 
         //"Sine wave" (actually a triangle wave) Pitch Modulation Button
-        sineModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        sineModButton.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
-                sample.startSineMod();
+                sample.startSineMod()
             } else {
-                sample.stopSineMod();
-                sample.adjustPitch(pitchSlider.getProgress());
+                sample.stopSineMod()
+                sample.adjustPitch(pitchSlider.progress)
             }
-        });
+        }
 
         //Saw-wave Pitch Modulation Button
-        sawModButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        sawModButton.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
-                sample.startSawMod();
+                sample.startSawMod()
             } else {
-                sample.stopSawMod();
-                sample.adjustPitch(pitchSlider.getProgress());
+                sample.stopSawMod()
+                sample.adjustPitch(pitchSlider.progress)
             }
-        });
+        }
 
         //__________________________________________________________Sliders__________________________________________________________
 
         //Slider Initialization
-        volumeSlider.setMax(VOLUME_SLIDER_MAX);
-        pitchSlider.setMax(PITCH_SLIDER_MAX);
-        lengthSlider.setMax(PLAY_LENGTH_SLIDER_MAX);
-        modulatorSpeedSlider.setMax(RANDOMIZER_SPEED_SLIDER_MAX);
-        modulatorIntensitySlider.setMax(RANDOMIZER_INTENSITY_SLIDER_MAX);
+        volumeSlider.max = VOLUME_SLIDER_MAX
+        pitchSlider.max = PITCH_SLIDER_MAX
+        lengthSlider.max = PLAY_LENGTH_SLIDER_MAX
+        modulatorSpeedSlider.max = RANDOMIZER_SPEED_SLIDER_MAX
+        modulatorIntensitySlider.max = RANDOMIZER_INTENSITY_SLIDER_MAX
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            pitchSlider.setMin(PITCH_SLIDER_MIN);
-            lengthSlider.setMin(PLAY_LENGTH_SLIDER_MIN);
-            modulatorSpeedSlider.setMin(RANDOMIZER_SPEED_SLIDER_MIN);
-            modulatorIntensitySlider.setMin(RANDOMIZER_INTENSITY_SLIDER_MIN);
+            pitchSlider.min = PITCH_SLIDER_MIN
+            lengthSlider.min = PLAY_LENGTH_SLIDER_MIN
+            modulatorSpeedSlider.min = RANDOMIZER_SPEED_SLIDER_MIN
+            modulatorIntensitySlider.min =
+                RANDOMIZER_INTENSITY_SLIDER_MIN
         }
-        volumeSlider.setProgress(sample.getVolume());
-        pitchSlider.setProgress(sample.getPitch());
-        lengthSlider.setProgress(sample.getLength());
-        modulatorSpeedSlider.setProgress(sample.getModulatorSpeed());
-        modulatorIntensitySlider.setProgress(sample.getModulatorIntensity());
+        volumeSlider.progress = sample.volume
+        pitchSlider.progress = sample.pitch
+        lengthSlider.progress = sample.length
+        modulatorSpeedSlider.progress = sample.modulatorSpeed
+        modulatorIntensitySlider.progress = sample.modulatorIntensity
 
         //Volume Slider
-        volumeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                sample.adjustVolume(i);
+        volumeSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                sample.adjustVolume(i)
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
 
         //Pitch Slider
-        pitchSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        pitchSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 //workaround for old devices that don't support min slider value
-                if(i >= PITCH_SLIDER_MIN) sample.adjustPitch(i);
+                if (i >= PITCH_SLIDER_MIN) sample.adjustPitch(i)
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
 
         //Play Length Slider. high "play length" value makes the loop shorter and vice versa.
-        lengthSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        lengthSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 //workaround for old devices that don't support min slider value
-                if(i >= PLAY_LENGTH_SLIDER_MIN) sample.adjustPlayLength(i);
+                if (i >= PLAY_LENGTH_SLIDER_MIN) sample.adjustPlayLength(i)
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
 
         //Pitch Modulation Speed Slider
-        modulatorSpeedSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        modulatorSpeedSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 //workaround for old devices that don't support min slider value
-                if(i >= RANDOMIZER_SPEED_SLIDER_MIN) sample.setModulatorSpeed(i);
+                if (i >= RANDOMIZER_SPEED_SLIDER_MIN) sample.modulatorSpeed = i
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
 
 
         //Pitch Modulation "Intensity" Slider. limits how high / low the modulator can set the sample's pitch value.
-        modulatorIntensitySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        modulatorIntensitySlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 //workaround for old devices that don't support min slider value
-                if(i >= RANDOMIZER_INTENSITY_SLIDER_MIN) sample.setModulatorIntensity(i);
+                if (i >= RANDOMIZER_INTENSITY_SLIDER_MIN) sample.modulatorIntensity = i
             }
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
 
-        return convertView;
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+
+        return convertView
+    }
+
+    companion object {
+        private const val VOLUME_SLIDER_MAX = 100
+        private const val PITCH_SLIDER_MAX = Utils.SAMPLE_RATE_HZ_TIMES_TWO
+        private const val PITCH_SLIDER_MIN = 1
+        private const val PLAY_LENGTH_SLIDER_MAX = 100
+        private const val PLAY_LENGTH_SLIDER_MIN = 2
+        private const val RANDOMIZER_SPEED_SLIDER_MAX = 200
+        private const val RANDOMIZER_SPEED_SLIDER_MIN = 1
+        private const val RANDOMIZER_INTENSITY_SLIDER_MAX = 7
+        private const val RANDOMIZER_INTENSITY_SLIDER_MIN = 0
     }
 }

@@ -1,373 +1,370 @@
-package com.alexkang.loopboard;
+package com.alexkang.loopboard
 
-import static android.app.PendingIntent.getActivity;
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioManager
+import android.media.AudioTrack
+import android.util.Log
+import com.alexkang.loopboard.LoopboardApplication.Companion.getApplication
+import com.alexkang.loopboard.Recorder.RecorderCallback
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.util.Random
+import java.util.concurrent.ExecutorService
 
-import android.content.Context;
-import android.media.AudioAttributes;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.util.Log;
+class RecordedSample private constructor(
+    val name: String,
+    context: Context,
+    isCapturingAudio: Boolean
+) {
+    private lateinit var bytes: ByteArray
+    private var audioTrack: AudioTrack? = null
+    private val reRecorder: Recorder
+    var volume: Int = 100
+        private set
+    var pitch: Int
+        private set
+    var length: Int = 2
+        private set
+    private val modulatorExecutor: ExecutorService?
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
+    @JvmField
+    @set:Synchronized
+    var modulatorSpeed: Int = 1
 
-class RecordedSample extends Sample {
-
-    private static final String TAG = "RecordedSample";
-    private final String name;
-    private byte[] bytes;
-    private AudioTrack audioTrack;
-    private final Recorder reRecorder;
-    private int volume;
-    private int pitch;
-    private int play_length;
-    private final ExecutorService modulatorExecutor;
-    private int modulatorSpeed;
-    private int modulatorIntensity;
-    private boolean isLooping;
-    private boolean isHighOctave;
-    private boolean isModulatingRandom;
-    private boolean isModulatingSine;
-    private boolean isModulatingSaw;
-    private boolean isReRecording;
-    Random r = new Random();
+    @JvmField
+    @set:Synchronized
+    var modulatorIntensity: Int = 0
+    var isLooping: Boolean = false
+        private set
+    private var isHighOctave = false
+    var isModulatingRandom: Boolean = false
+        private set
+    var isModulatingSine: Boolean = false
+        private set
+    var isModulatingSaw: Boolean = false
+        private set
+    var isReRecording: Boolean = false
+        private set
+    var r: Random = Random()
 
 
-    /**
-     * Open a PCM {@link File} and initialize it to play back. This is the correct way to obtain a
-     * {@link RecordedSample} object.
-     *
-     * @return A sample object ready to be played, or null if an error occurred.
-     */
-    static RecordedSample openSavedSample(Context context, String fileName, boolean isCapturingAudio) {
-        try {
-            // Read the file into bytes.
-            FileInputStream input = context.openFileInput(fileName);
-            byte[] output = new byte[input.available()];
-            int bytesRead = input.read(output);
-            input.close();
-
-            // Make sure we actually read all the bytes.
-            if (bytesRead == output.length) {
-                RecordedSample recordedSample = new RecordedSample(fileName,context,isCapturingAudio);
-                recordedSample.loadNewSample(output);
-                return recordedSample;
-            }
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, String.format(
-                    "refreshRecordings: Unable to open sample %s", fileName));
-        } catch (IOException e) {
-            Log.e(TAG, String.format(
-                    "refreshRecordings: Error while reading sample %s", fileName));
-        }
-        return null;
+    init {
+        this.pitch = Utils.SAMPLE_RATE_HZ
+        this.modulatorExecutor = getApplication(context).executorService
+        this.reRecorder = Recorder(context, isCapturingAudio)
     }
 
-    private RecordedSample(String name, Context context, boolean isCapturingAudio) {
-        this.name = name;
-        this.volume = 100;
-        this.pitch = Utils.SAMPLE_RATE_HZ;
-        this.play_length = 2;
-        this.modulatorExecutor = LoopboardApplication.getApplication(context).getExecutorService();
-        this.modulatorSpeed = 1;
-        this.modulatorIntensity = 0;
-        this.reRecorder = new Recorder(context,isCapturingAudio);
-        this.isReRecording = false;
+    fun isHighOctave(): Boolean {
+        return isHighOctave
     }
 
-    @Override String getName() {
-        return name;
-    }
 
-    @Override int getVolume() {return volume;}
-
-    @Override int getPitch() { return pitch; }
-
-    @Override int getLength() {return play_length; }
-
-    @Override int getModulatorSpeed() {return modulatorSpeed; }
-
-    @Override int getModulatorIntensity() {return modulatorIntensity; }
-
-    @Override boolean isLooping() {
-        return isLooping;
-    }
-
-    @Override boolean isHighOctave() {
-        return isHighOctave;
-    }
-
-    @Override boolean isModulatingRandom() {
-        return isModulatingRandom;
-    }
-
-    @Override boolean isModulatingSine() {
-        return isModulatingSine;
-    }
-
-    @Override boolean isModulatingSaw() {
-        return isModulatingSaw;
-    }
-    @Override boolean isReRecording() { return isReRecording;}
-
-    @Override
-    synchronized void play(boolean isLooped) {
+    @Synchronized
+    fun play(isLooped: Boolean) {
         // Stop any ongoing playback.
-        audioTrack.stop();
-        audioTrack.reloadStaticData();
+        audioTrack!!.stop()
+        audioTrack!!.reloadStaticData()
 
         // Set looping, if needed.
         if (isLooped) {
             // The actual amount of frames in a PCM file is half of the raw byte size.
-            Log.d("debug length",Integer.toString(this.play_length));
-            audioTrack.setLoopPoints(0, bytes.length / this.play_length, -1);
+            Log.d("debug length", length.toString())
+            audioTrack!!.setLoopPoints(0, bytes.size / this.length, -1)
         } else {
-            audioTrack.setLoopPoints(0, 0, 0);
+            audioTrack!!.setLoopPoints(0, 0, 0)
         }
 
         // Play the sample and update the loop status.
-        audioTrack.play();
-        isLooping = isLooped;
+        audioTrack!!.play()
+        isLooping = isLooped
     }
 
-    @Override
-    synchronized void stop() {
-        if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
-            audioTrack.pause();
+    @Synchronized
+    fun stop() {
+        if (audioTrack!!.state == AudioTrack.STATE_INITIALIZED) {
+            audioTrack!!.pause()
         }
-        isLooping = false;
+        isLooping = false
     }
 
-    @Override
-    synchronized void adjustVolume(int targetVolume) {
-        this.volume = targetVolume;
-        float finalvolume = (float) (targetVolume / 100.0);
-        audioTrack.setVolume(finalvolume);
+    @Synchronized
+    fun adjustVolume(targetVolume: Int) {
+        this.volume = targetVolume
+        val finalvolume = (targetVolume / 100.0).toFloat()
+        audioTrack!!.setVolume(finalvolume)
     }
 
-    @Override
-    synchronized void adjustPitch(int i) {
-        this.pitch = i;
-        if(this.isHighOctave) audioTrack.setPlaybackRate(i*2);
-        else audioTrack.setPlaybackRate(i);
+    @Synchronized
+    fun adjustPitch(i: Int) {
+        this.pitch = i
+        if (this.isHighOctave) audioTrack!!.setPlaybackRate(i * 2)
+        else audioTrack!!.setPlaybackRate(i)
     }
 
-    @Override
-    synchronized void adjustPlayLength(int i) {
-        this.play_length = i;
-        if(isLooping) play(true);
+    @Synchronized
+    fun adjustPlayLength(i: Int) {
+        this.length = i
+        if (isLooping) play(true)
     }
 
-    @Override
-    synchronized void setHighOctave(boolean x){
-        this.isHighOctave = x;
-        int i = this.pitch;
-        if(x) audioTrack.setPlaybackRate(i*2);
-        else audioTrack.setPlaybackRate(i);
+    @Synchronized
+    fun setHighOctave(x: Boolean) {
+        this.isHighOctave = x
+        val i = this.pitch
+        if (x) audioTrack!!.setPlaybackRate(i * 2)
+        else audioTrack!!.setPlaybackRate(i)
     }
 
-    @Override
-    synchronized void setModulatorSpeed(int i) { this.modulatorSpeed = i; }
-
-    @Override
-    synchronized void setModulatorIntensity(int i) { this.modulatorIntensity = i; }
-
-    @Override
-    synchronized void startRandomMod() {
-        if(this.isModulatingRandom) {
+    @Synchronized
+    fun startRandomMod() {
+        if (this.isModulatingRandom) {
             //no two random modulators should run simultaneously
-            return;
+            return
         }
-        this.isModulatingRandom = true;
-        modulatorExecutor.submit(new Runnable() {
-            int intervalModifier;
-            int rangeModifier;
-            int min;
-            int max;
-            int rand;
+        this.isModulatingRandom = true
+        modulatorExecutor!!.submit(object : Runnable {
+            var intervalModifier: Int = 0
+            var rangeModifier: Int = 0
+            var min: Int = 0
+            var max: Int = 0
+            var rand: Int = 0
 
-            @Override
-            public void run() {
+            override fun run() {
                 while (isModulatingRandom) {
-                    intervalModifier = modulatorSpeed;
-                    rangeModifier = modulatorIntensity;
-                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
-                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
-                    rand = r.nextInt((max - min) + min) + Math.round(min / 2);
-                    adjustPitch(rand);
+                    intervalModifier = modulatorSpeed
+                    rangeModifier = modulatorIntensity
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
+                    max =
+                        Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
+                    rand = r.nextInt((max - min) + min) + Math.round((min / 2).toFloat())
+                    adjustPitch(rand)
                     try {
-                        Thread.sleep(2000 / modulatorSpeed);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        Thread.sleep((2000 / modulatorSpeed).toLong())
+                    } catch (e: InterruptedException) {
+                        throw RuntimeException(e)
                     }
                 }
             }
-        });
+        })
     }
 
-    @Override
-    synchronized void startSineMod() {
-        if(this.isModulatingSine) {
+    @Synchronized
+    fun startSineMod() {
+        if (this.isModulatingSine) {
             //no two sine modulators should run simultaneously
-            return;
+            return
         }
-        this.isModulatingSine = true;
-        modulatorExecutor.submit(new Runnable() {
-            boolean climbing = true;
-            int intervalModifier;
-            int rangeModifier;
-            int min;
-            int max;
-            int i;
+        this.isModulatingSine = true
+        modulatorExecutor!!.submit(object : Runnable {
+            var climbing: Boolean = true
+            var intervalModifier: Int = 0
+            var rangeModifier: Int = 0
+            var min: Int = 0
+            var max: Int = 0
+            var i: Int = 0
 
-            @Override
-            public void run() {
+            override fun run() {
                 while (isModulatingSine) {
-                    intervalModifier = modulatorSpeed;
-                    rangeModifier = modulatorIntensity;
-                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
-                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
-                    i = pitch;
+                    intervalModifier = modulatorSpeed
+                    rangeModifier = modulatorIntensity
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
+                    max =
+                        Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
+                    i = pitch
 
                     if (climbing) {
                         if (i >= max - 10) {
-                            climbing = false;
+                            climbing = false
                         } else {
-                            adjustPitch(i + (10 * intervalModifier));
+                            adjustPitch(i + (10 * intervalModifier))
                             //adjustPitch(i + 100);
                         }
                     } else {
                         if (i <= min + 10) {
-                            climbing = true;
+                            climbing = true
                         } else {
-                            adjustPitch(i - (10 * intervalModifier));
+                            adjustPitch(i - (10 * intervalModifier))
                             //adjustPitch(i - 100);
                         }
                     }
                     try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        Thread.sleep(1)
+                    } catch (e: InterruptedException) {
+                        throw RuntimeException(e)
                     }
                 }
             }
-        });
+        })
     }
 
-    @Override
-    synchronized void startSawMod() {
-        if(this.isModulatingSaw) {
+    @Synchronized
+    fun startSawMod() {
+        if (this.isModulatingSaw) {
             //no two saw modulators should run simultaneously
-            return;
+            return
         }
-        this.isModulatingSaw = true;
-        modulatorExecutor.submit(new Runnable() {
-            int intervalModifier;
-            int rangeModifier;
-            int min;
-            int max;
-            int i;
+        this.isModulatingSaw = true
+        modulatorExecutor!!.submit(object : Runnable {
+            var intervalModifier: Int = 0
+            var rangeModifier: Int = 0
+            var min: Int = 0
+            var max: Int = 0
+            var i: Int = 0
 
-            @Override
-            public void run() {
+            override fun run() {
                 while (isModulatingSaw) {
-                    intervalModifier = modulatorSpeed;
-                    rangeModifier = modulatorIntensity;
-                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT;
-                    max = Utils.SAMPLE_RATE_HZ_TIMES_TWO - (rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT);
-                    i = pitch;
+                    intervalModifier = modulatorSpeed
+                    rangeModifier = modulatorIntensity
+                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
+                    max =
+                        Utils.SAMPLE_RATE_HZ_TIMES_TWO - (rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT)
+                    i = pitch
                     if (i >= max - 10) {
-                        adjustPitch(min);
+                        adjustPitch(min)
                     } else {
-                        adjustPitch(i + 10 * intervalModifier);
+                        adjustPitch(i + 10 * intervalModifier)
                     }
                     try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        Thread.sleep(1)
+                    } catch (e: InterruptedException) {
+                        throw RuntimeException(e)
                     }
                 }
             }
-        });
+        })
     }
 
-    @Override
-    synchronized void stopRandomMod() {
-        this.isModulatingRandom = false;
+    @Synchronized
+    fun stopRandomMod() {
+        this.isModulatingRandom = false
     }
 
-    @Override
-    synchronized void stopSineMod() {
-        this.isModulatingSine = false;
+    @Synchronized
+    fun stopSineMod() {
+        this.isModulatingSine = false
     }
 
-    @Override
-    synchronized void stopSawMod() {
-        this.isModulatingSaw = false;
+    @Synchronized
+    fun stopSawMod() {
+        this.isModulatingSaw = false
     }
-    @Override
-    synchronized void setIsCapturingAudio(boolean t){
-        reRecorder.setIsCapturingAudio(t);
+
+    @Synchronized
+    fun setIsCapturingAudio(t: Boolean) {
+        reRecorder.isCapturingAudio = t
     }
-    @Override
-    synchronized void setAudioPlaybackCaptureConfiguration(Context context){
-        this.reRecorder.setAudioPlaybackCaptureConfiguration(context);
+
+    @Synchronized
+    fun setAudioPlaybackCaptureConfiguration(context: Context) {
+        reRecorder.setAudioPlaybackCaptureConfiguration(context)
     }
-    @Override
-    synchronized void shutdown() {
+
+    @Synchronized
+    fun shutdown() {
         //Stop all modulations
-        this.stopRandomMod();
-        this.stopSineMod();
-        this.stopSawMod();
-        this.stopReRecording();
-        audioTrack.release();
-        reRecorder.shutdown();
+        this.stopRandomMod()
+        this.stopSineMod()
+        this.stopSawMod()
+        this.stopReRecording()
+        audioTrack!!.release()
+        reRecorder.shutdown()
     }
 
-    /** Update a recorded sample and save it to disk. */
-    synchronized void save(Context context, byte[] bytes) {
-        this.stop();
-        loadNewSample(bytes);
-        Utils.saveRecording(context, name, bytes);
+    /** Update a recorded sample and save it to disk.  */
+    @Synchronized
+    fun save(context: Context, bytes: ByteArray) {
+        this.stop()
+        loadNewSample(bytes)
+        Utils.saveRecording(context, name, bytes)
     }
 
 
-
-    /** Updates the recorded sample. Overwrites any previous recording in this sample. */
-    private void loadNewSample(byte[] bytes) {
-        this.bytes = bytes;
+    /** Updates the recorded sample. Overwrites any previous recording in this sample.  */
+    private fun loadNewSample(bytes: ByteArray) {
+        this.bytes = bytes
         this.audioTrack =
-                new AudioTrack(
-                        new AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_MEDIA)
-                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                .build(),
-                        new AudioFormat.Builder()
-                                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                                .setSampleRate(Utils.SAMPLE_RATE_HZ)
-                                .build(),
-                        bytes.length,
-                        AudioTrack.MODE_STATIC,
-                        AudioManager.AUDIO_SESSION_ID_GENERATE);
+            AudioTrack(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build(),
+                AudioFormat.Builder()
+                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .setSampleRate(Utils.SAMPLE_RATE_HZ)
+                    .build(),
+                bytes.size,
+                AudioTrack.MODE_STATIC,
+                AudioManager.AUDIO_SESSION_ID_GENERATE
+            )
 
         // Write the audio bytes to the audioTrack to play back.
-        audioTrack.write(bytes, 0, bytes.length);
+        audioTrack!!.write(bytes, 0, bytes.size)
     }
 
     //I think each sample should have its own recorder. what could go wrong
-    @Override synchronized void startReRecording(Context context){
-        if(this.isReRecording) return;
-        this.isReRecording = true;
-        reRecorder.startRecording(recordedBytes -> this.save(context, recordedBytes));
+    @Synchronized
+    fun startReRecording(context: Context) {
+        if (this.isReRecording) return
+        this.isReRecording = true
+
+        reRecorder.startRecording { recordedBytes: ByteArray ->
+            this.save(
+                context,
+                recordedBytes
+            )
+        }
     }
-    @Override synchronized void stopReRecording(){
-        reRecorder.stopRecording();
-        this.isReRecording = false;
+
+    @Synchronized
+    fun stopReRecording() {
+        reRecorder.stopRecording()
+        this.isReRecording = false
+    }
+
+    companion object {
+        private const val TAG = "RecordedSample"
+
+        /**
+         * Open a PCM [File] and initialize it to play back. This is the correct way to obtain a
+         * [RecordedSample] object.
+         *
+         * @return A sample object ready to be played, or null if an error occurred.
+         */
+        fun openSavedSample(
+            context: Context,
+            fileName: String,
+            isCapturingAudio: Boolean
+        ): RecordedSample? {
+            try {
+                // Read the file into bytes.
+                val input = context.openFileInput(fileName)
+                val output = ByteArray(input.available())
+                val bytesRead = input.read(output)
+                input.close()
+
+                // Make sure we actually read all the bytes.
+                if (bytesRead == output.size) {
+                    val recordedSample = RecordedSample(fileName, context, isCapturingAudio)
+                    recordedSample.loadNewSample(output)
+                    return recordedSample
+                }
+            } catch (e: FileNotFoundException) {
+                Log.e(
+                    TAG, String.format(
+                        "refreshRecordings: Unable to open sample %s", fileName
+                    )
+                )
+            } catch (e: IOException) {
+                Log.e(
+                    TAG, String.format(
+                        "refreshRecordings: Error while reading sample %s", fileName
+                    )
+                )
+            }
+            return null
+        }
     }
 }

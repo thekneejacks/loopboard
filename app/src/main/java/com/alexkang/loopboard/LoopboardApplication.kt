@@ -1,37 +1,24 @@
-package com.alexkang.loopboard;
+package com.alexkang.loopboard
 
-import android.app.Application;
-import android.content.Context;
-import android.media.AudioPlaybackCaptureConfiguration;
+import android.app.Application
+import android.content.Context
+import android.media.AudioPlaybackCaptureConfiguration
+import java.util.concurrent.ExecutorService
 
-import java.util.concurrent.ExecutorService;
+class LoopboardApplication : Application() {
+    @JvmField
+    var audioPlaybackCaptureConfiguration: AudioPlaybackCaptureConfiguration? = null
+    @JvmField
+    var executorService: ExecutorService? = null
 
-public class LoopboardApplication extends Application {
-    private static Context context;
-    private AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration;
-    private ExecutorService executorService;
-
-    public void onCreate() {
-        super.onCreate();
-        LoopboardApplication.context = getApplicationContext();
+    fun shutdown() {
+        executorService!!.shutdown()
     }
 
-    public static LoopboardApplication getApplication(Context context) {
-        return (LoopboardApplication) context.getApplicationContext();
-    }
-    public AudioPlaybackCaptureConfiguration getAudioPlaybackCaptureConfiguration() {
-        return audioPlaybackCaptureConfiguration;
-    }
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
-    public void setAudioPlaybackCaptureConfiguration(AudioPlaybackCaptureConfiguration audioPlaybackCaptureConfiguration) {
-        this.audioPlaybackCaptureConfiguration = audioPlaybackCaptureConfiguration;
-    }
-    public void setExecutorService(ExecutorService executorService){
-        this.executorService = executorService;
-    }
-    public void shutdown(){
-        executorService.shutdown();
+    companion object {
+        @JvmStatic
+        fun getApplication(context: Context): LoopboardApplication {
+            return context.applicationContext as LoopboardApplication
+        }
     }
 }
