@@ -6,8 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
 import android.util.Log
-import com.alexkang.loopboard.LoopboardApplication.Companion.getApplication
-import com.alexkang.loopboard.Recorder.RecorderCallback
+import com.alexkang.loopboard.modulators.PitchModulator
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.Random
@@ -15,7 +14,6 @@ import java.util.concurrent.ExecutorService
 
 class RecordedSample private constructor(
     val name: String,
-    context: Context,
     isCapturingAudio: Boolean
 ) {
     private lateinit var bytes: ByteArray
@@ -27,24 +25,20 @@ class RecordedSample private constructor(
         private set
     var length: Int = 2
         private set
-    private val modulatorExecutor: ExecutorService?
 
     @JvmField
-    @set:Synchronized
+    //@set:Synchronized
     var modulatorSpeed: Int = 1
 
     @JvmField
-    @set:Synchronized
+    //@set:Synchronized
     var modulatorIntensity: Int = 0
     var isLooping: Boolean = false
         private set
     private var isHighOctave = false
     var isModulatingRandom: Boolean = false
-        private set
     var isModulatingSine: Boolean = false
-        private set
     var isModulatingSaw: Boolean = false
-        private set
     var isReRecording: Boolean = false
         private set
     var r: Random = Random()
@@ -52,8 +46,7 @@ class RecordedSample private constructor(
 
     init {
         this.pitch = Utils.SAMPLE_RATE_HZ
-        this.modulatorExecutor = getApplication(context).executorService
-        this.reRecorder = Recorder(context, isCapturingAudio)
+        this.reRecorder = Recorder(isCapturingAudio)
     }
 
     fun isHighOctave(): Boolean {
@@ -119,121 +112,17 @@ class RecordedSample private constructor(
 
     @Synchronized
     fun startRandomMod() {
-        if (this.isModulatingRandom) {
-            //no two random modulators should run simultaneously
-            return
-        }
-        this.isModulatingRandom = true
-        modulatorExecutor!!.submit(object : Runnable {
-            var intervalModifier: Int = 0
-            var rangeModifier: Int = 0
-            var min: Int = 0
-            var max: Int = 0
-            var rand: Int = 0
-
-            override fun run() {
-                while (isModulatingRandom) {
-                    intervalModifier = modulatorSpeed
-                    rangeModifier = modulatorIntensity
-                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
-                    max =
-                        Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
-                    rand = r.nextInt((max - min) + min) + Math.round((min / 2).toFloat())
-                    adjustPitch(rand)
-                    try {
-                        Thread.sleep((2000 / modulatorSpeed).toLong())
-                    } catch (e: InterruptedException) {
-                        throw RuntimeException(e)
-                    }
-                }
-            }
-        })
+        PitchModulator.startRandomMod(this)
     }
 
     @Synchronized
     fun startSineMod() {
-        if (this.isModulatingSine) {
-            //no two sine modulators should run simultaneously
-            return
-        }
-        this.isModulatingSine = true
-        modulatorExecutor!!.submit(object : Runnable {
-            var climbing: Boolean = true
-            var intervalModifier: Int = 0
-            var rangeModifier: Int = 0
-            var min: Int = 0
-            var max: Int = 0
-            var i: Int = 0
-
-            override fun run() {
-                while (isModulatingSine) {
-                    intervalModifier = modulatorSpeed
-                    rangeModifier = modulatorIntensity
-                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
-                    max =
-                        Utils.SAMPLE_RATE_HZ_TIMES_TWO - rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
-                    i = pitch
-
-                    if (climbing) {
-                        if (i >= max - 10) {
-                            climbing = false
-                        } else {
-                            adjustPitch(i + (10 * intervalModifier))
-                            //adjustPitch(i + 100);
-                        }
-                    } else {
-                        if (i <= min + 10) {
-                            climbing = true
-                        } else {
-                            adjustPitch(i - (10 * intervalModifier))
-                            //adjustPitch(i - 100);
-                        }
-                    }
-                    try {
-                        Thread.sleep(1)
-                    } catch (e: InterruptedException) {
-                        throw RuntimeException(e)
-                    }
-                }
-            }
-        })
+        PitchModulator.startSineMod(this)
     }
 
     @Synchronized
     fun startSawMod() {
-        if (this.isModulatingSaw) {
-            //no two saw modulators should run simultaneously
-            return
-        }
-        this.isModulatingSaw = true
-        modulatorExecutor!!.submit(object : Runnable {
-            var intervalModifier: Int = 0
-            var rangeModifier: Int = 0
-            var min: Int = 0
-            var max: Int = 0
-            var i: Int = 0
-
-            override fun run() {
-                while (isModulatingSaw) {
-                    intervalModifier = modulatorSpeed
-                    rangeModifier = modulatorIntensity
-                    min = rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT
-                    max =
-                        Utils.SAMPLE_RATE_HZ_TIMES_TWO - (rangeModifier * Utils.SAMPLE_RATE_HZ_DIVIDED_BY_EIGHT)
-                    i = pitch
-                    if (i >= max - 10) {
-                        adjustPitch(min)
-                    } else {
-                        adjustPitch(i + 10 * intervalModifier)
-                    }
-                    try {
-                        Thread.sleep(1)
-                    } catch (e: InterruptedException) {
-                        throw RuntimeException(e)
-                    }
-                }
-            }
-        })
+        PitchModulator.startSawMod(this)
     }
 
     @Synchronized
@@ -257,8 +146,8 @@ class RecordedSample private constructor(
     }
 
     @Synchronized
-    fun setAudioPlaybackCaptureConfiguration(context: Context) {
-        reRecorder.setAudioPlaybackCaptureConfiguration(context)
+    fun setAudioPlaybackCaptureConfiguration() {
+        reRecorder.setAudioPlaybackCaptureConfiguration()
     }
 
     @Synchronized
@@ -347,7 +236,7 @@ class RecordedSample private constructor(
 
                 // Make sure we actually read all the bytes.
                 if (bytesRead == output.size) {
-                    val recordedSample = RecordedSample(fileName, context, isCapturingAudio)
+                    val recordedSample = RecordedSample(fileName, isCapturingAudio)
                     recordedSample.loadNewSample(output)
                     return recordedSample
                 }

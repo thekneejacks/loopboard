@@ -2,9 +2,12 @@ package com.alexkang.loopboard
 
 import android.content.Context
 import android.media.AudioFormat
+import android.media.AudioPlaybackCaptureConfiguration
 import android.media.AudioRecord
 import android.util.Log
 import java.io.IOException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 internal object Utils {
     const val MAX_SAMPLES: Int = 24
@@ -30,6 +33,7 @@ internal object Utils {
      *
      * @return whether or not the file was successfully saved
      */
+
     fun saveRecording(context: Context, name: String, recordedBytes: ByteArray?): Boolean {
         try {
             val output = context.openFileOutput(name, Context.MODE_PRIVATE)
@@ -49,5 +53,18 @@ internal object Utils {
             const val STOPFOREGROUND_ACTION: String =
                 "com.alexkang.loopboard.MediaProjectionService.action.stopforeground"
         }
+    }
+
+    private val executorService: ExecutorService = Executors.newCachedThreadPool()
+    private var audioPlaybackCaptureConfiguration: AudioPlaybackCaptureConfiguration? = null
+
+    fun setAudioPlaybackCaptureConfiguration(audioPlaybackCaptureConfiguration: AudioPlaybackCaptureConfiguration?){
+        this.audioPlaybackCaptureConfiguration = audioPlaybackCaptureConfiguration
+    }
+
+    fun getExecutorService(): ExecutorService = executorService
+    fun getAudioPlaybackCaptureConfiguration() : AudioPlaybackCaptureConfiguration? = audioPlaybackCaptureConfiguration
+    fun shutdown(){
+        executorService.shutdown()
     }
 }

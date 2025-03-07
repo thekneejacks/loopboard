@@ -8,14 +8,13 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Build
 import android.util.Log
-import com.alexkang.loopboard.LoopboardApplication.Companion.getApplication
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.concurrent.ExecutorService
 import kotlin.concurrent.Volatile
 
 
-internal class Recorder(context: Context, isCapturingAudio: Boolean) {
+internal class Recorder(isCapturingAudio: Boolean) {
     private val recordExecutor: ExecutorService?
     private var audioRecord: AudioRecord? = null
     private var audioPlaybackCaptureConfiguration: AudioPlaybackCaptureConfiguration?
@@ -34,16 +33,14 @@ internal class Recorder(context: Context, isCapturingAudio: Boolean) {
     }
 
     init {
-        this.audioPlaybackCaptureConfiguration =
-            getApplication(context).audioPlaybackCaptureConfiguration
-        this.recordExecutor = getApplication(context).executorService
+        this.audioPlaybackCaptureConfiguration = Utils.getAudioPlaybackCaptureConfiguration()
+        this.recordExecutor = Utils.getExecutorService()
         this.isCapturingAudio = isCapturingAudio
     }
 
     @Synchronized
-    fun setAudioPlaybackCaptureConfiguration(context: Context) {
-        this.audioPlaybackCaptureConfiguration =
-            getApplication(context).audioPlaybackCaptureConfiguration
+    fun setAudioPlaybackCaptureConfiguration() {
+        this.audioPlaybackCaptureConfiguration = Utils.getAudioPlaybackCaptureConfiguration()
     }
 
     @Synchronized

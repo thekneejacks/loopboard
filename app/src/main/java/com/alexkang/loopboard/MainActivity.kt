@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //executorService = Executors.newCachedThreadPool();
-        LoopboardApplication.getApplication(this).executorService = Executors.newCachedThreadPool()
+        //LoopboardApplication.getApplication(this).executorService = Executors.newCachedThreadPool()
         checkPermissions() //initialize recorder
 
         // Retrieve UI elements.
@@ -114,11 +114,9 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         shutdownSamples()
-
         stopMediaProjectionService()
-
         recorder.shutdown()
-        LoopboardApplication.getApplication(this).shutdown()
+        Utils.shutdown()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -220,9 +218,8 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             displaySnackbarDialog("Internal audio capture requires Android 10 or above.")
-            LoopboardApplication.getApplication(this).audioPlaybackCaptureConfiguration =
-                getApplicationAudioPlaybackCaptureConfiguration(mediaProjection)
-            recorder = Recorder(this, isAudioCaptureMode) //Microphone mode
+            Utils.setAudioPlaybackCaptureConfiguration(getApplicationAudioPlaybackCaptureConfiguration(mediaProjection))
+            recorder = Recorder(isAudioCaptureMode) //Microphone mode
             hideSwitchButtons()
         } else {
             // create a prompt to ask for permission to capture audio
@@ -391,11 +388,10 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == RESULT_CANCELED) {
             displaySnackbarDialog("Audio capture not granted. Switching to Microphone only mode.")
             //mediaProjection is null; recorder will automatically use microphone
-            LoopboardApplication.getApplication(this).audioPlaybackCaptureConfiguration =
-                getApplicationAudioPlaybackCaptureConfiguration(mediaProjection)
-            recorder = Recorder(this, false)
+            Utils.setAudioPlaybackCaptureConfiguration(getApplicationAudioPlaybackCaptureConfiguration(mediaProjection))
+            recorder = Recorder(false)
             for (sample in recordedSamples) {
-                sample.setAudioPlaybackCaptureConfiguration(this)
+                sample.setAudioPlaybackCaptureConfiguration()
                 sample.setIsCapturingAudio(false)
             }
             hideSwitchButtons()
@@ -405,20 +401,19 @@ class MainActivity : AppCompatActivity() {
                 if (isMyServiceRunning) {
                     mediaProjection =
                         data?.let { mediaProjectionManager!!.getMediaProjection(resultCode, it) }!!
-                    LoopboardApplication.getApplication(this).audioPlaybackCaptureConfiguration =
-                        getApplicationAudioPlaybackCaptureConfiguration(mediaProjection)
+                    Utils.setAudioPlaybackCaptureConfiguration(getApplicationAudioPlaybackCaptureConfiguration(mediaProjection))
                     if (mediaProjection != null) {
                         displaySnackbarDialog("Audio capture granted.")
-                        recorder = Recorder(this, true)
+                        recorder = Recorder(true)
                         for (sample in recordedSamples) {
-                            sample.setAudioPlaybackCaptureConfiguration(this)
+                            sample.setAudioPlaybackCaptureConfiguration()
                             sample.setIsCapturingAudio(true)
                         }
                     } else {
                         displaySnackbarDialog("Failed to grant audio capture. falling back to Microphone mode.")
-                        recorder = Recorder(this, false)
+                        recorder = Recorder(false)
                         for (sample in recordedSamples) {
-                            sample.setAudioPlaybackCaptureConfiguration(this)
+                            sample.setAudioPlaybackCaptureConfiguration()
                             sample.setIsCapturingAudio(false)
                         }
                     }
