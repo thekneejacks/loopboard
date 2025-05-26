@@ -9,8 +9,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.CheckBox
 import android.widget.CompoundButton
+import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
+import androidx.core.widget.doOnTextChanged
 
 class SampleListAdapter internal constructor(
     private val context: Context,
@@ -56,8 +60,14 @@ class SampleListAdapter internal constructor(
         val sawModButton = convertView.findViewById<CheckBox>(R.id.saw)
         //Button playButton = convertView.findViewById(R.id.play);
         val volumeSlider = convertView.findViewById<SeekBar>(R.id.volume_slider)
+        val volumeText = convertView.findViewById<EditText>(R.id.volume_text)
         val pitchSlider = convertView.findViewById<SeekBar>(R.id.pitch_slider)
-        val lengthSlider = convertView.findViewById<SeekBar>(R.id.length_slider)
+        val pitchText = convertView.findViewById<EditText>(R.id.pitch_text)
+        //val lengthSlider = convertView.findViewById<SeekBar>(R.id.length_slider)
+        val lengthStart = convertView.findViewById<EditText>(R.id.length_start)
+        val lengthEnd = convertView.findViewById<EditText>(R.id.length_end)
+        val lengthTotal = convertView.findViewById<TextView>(R.id.length_total)
+        val lengthInSeconds = convertView.findViewById<TextView>(R.id.length_in_seconds)
         val modulatorSpeedSlider = convertView.findViewById<SeekBar>(R.id.randomizer_speed_slider)
         val modulatorIntensitySlider =
             convertView.findViewById<SeekBar>(R.id.randomizer_intensity_slider)
@@ -139,24 +149,32 @@ class SampleListAdapter internal constructor(
             }
         }
 
-        //__________________________________________________________Sliders__________________________________________________________
+        //__________________________________________________________Sliders & Texts__________________________________________________________
 
         //Slider Initialization
         volumeSlider.max = VOLUME_SLIDER_MAX
         pitchSlider.max = PITCH_SLIDER_MAX
-        lengthSlider.max = PLAY_LENGTH_SLIDER_MAX
+        //lengthSlider.max = PLAY_LENGTH_SLIDER_MAX
         modulatorSpeedSlider.max = RANDOMIZER_SPEED_SLIDER_MAX
         modulatorIntensitySlider.max = RANDOMIZER_INTENSITY_SLIDER_MAX
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pitchSlider.min = PITCH_SLIDER_MIN
-            lengthSlider.min = PLAY_LENGTH_SLIDER_MIN
+            //lengthSlider.min = PLAY_LENGTH_SLIDER_MIN
             modulatorSpeedSlider.min = RANDOMIZER_SPEED_SLIDER_MIN
             modulatorIntensitySlider.min =
                 RANDOMIZER_INTENSITY_SLIDER_MIN
         }
         volumeSlider.progress = sample.volume
-        pitchSlider.progress = sample.pitch
-        lengthSlider.progress = sample.length
+        volumeText.setText(sample.volume.toString())
+        if(sample.pitch <= PITCH_SLIDER_MAX) {
+            pitchSlider.progress = sample.pitch
+        }
+        pitchText.setText(sample.pitch.toString())
+        //lengthSlider.progress = sample.length
+        //lengthStart.setText(sample.lengthStart.toString())
+        //lengthEnd.setText(sample.lengthEnd.toString())
+        lengthTotal.text = sample.bytes.size.toString()
+        lengthInSeconds.text = (sample.bytes.size.toFloat()/Utils.SAMPLE_RATE_HZ/2).toString()
         modulatorSpeedSlider.progress = sample.modulatorSpeed
         modulatorIntensitySlider.progress = sample.modulatorIntensity
 
@@ -164,25 +182,86 @@ class SampleListAdapter internal constructor(
         volumeSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 sample.adjustVolume(i)
+                volumeText.setText(i.toString())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
+
+        volumeText.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                if(!volumeText.text.isNullOrBlank()) {
+                    val i = volumeText.text.toString().toInt()
+                    if (i in 1..VOLUME_SLIDER_MAX) {
+                        sample.adjustVolume(i)
+                        notifyDataSetChanged()
+                    } else {
+                        volumeText.setText(sample.volume.toString())
+                    }
+                }
+            }
+        }
 
         //Pitch Slider
         pitchSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 //workaround for old devices that don't support min slider value
-                if (i >= PITCH_SLIDER_MIN) sample.adjustPitch(i)
+                if (i >= PITCH_SLIDER_MIN) {
+                    sample.adjustPitch(i)
+                    pitchText.setText(i.toString())
+                }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
 
+        pitchText.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                if(!pitchText.text.isNullOrBlank()) {
+                    val i = pitchText.text.toString().toInt()
+                    if (i > PITCH_SLIDER_MAX) {
+                        sample.adjustPitch(i)
+                        notifyDataSetChanged()
+                    }
+                    else if (i in PITCH_SLIDER_MIN..PITCH_SLIDER_MAX) {
+                        sample.adjustPitch(i)
+                        notifyDataSetChanged()
+                    }
+                    else {
+                        pitchText.setText(sample.pitch.toString())
+                    }
+                }
+            }
+        }
+
+        lengthStart.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                if(!lengthStart.text.isNullOrBlank()) {
+                    val i = lengthStart.text.toString().toInt()
+                    if(i in 0..sample.bytes.size && i < sample.lengthEnd){
+                        sample.adjustLengthStart(i)
+                        notifyDataSetChanged()
+                    } else lengthStart.setText(sample.lengthStart.toString())
+                }
+            }
+        }
+
+        lengthEnd.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                if(!lengthEnd.text.isNullOrBlank()) {
+                    val i = lengthEnd.text.toString().toInt()
+                    if(i in 0..sample.bytes.size && i > sample.lengthStart){
+                        sample.adjustLengthEnd(i)
+                        notifyDataSetChanged()
+                    } else lengthEnd.setText(sample.lengthEnd.toString())
+                }
+            }
+        }
+
         //Play Length Slider. high "play length" value makes the loop shorter and vice versa.
-        lengthSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+        /*lengthSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 //workaround for old devices that don't support min slider value
                 if (i >= PLAY_LENGTH_SLIDER_MIN) sample.adjustPlayLength(i)
@@ -190,7 +269,7 @@ class SampleListAdapter internal constructor(
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
-        })
+        })*/
 
         //Pitch Modulation Speed Slider
         modulatorSpeedSlider.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {

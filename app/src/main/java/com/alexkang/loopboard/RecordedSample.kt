@@ -9,21 +9,22 @@ import android.util.Log
 import com.alexkang.loopboard.modulators.PitchModulator
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.Random
-import java.util.concurrent.ExecutorService
 
 class RecordedSample private constructor(
     val name: String,
     isCapturingAudio: Boolean
 ) {
-    private lateinit var bytes: ByteArray
+    lateinit var bytes: ByteArray
     private var audioTrack: AudioTrack? = null
     private val reRecorder: Recorder
     var volume: Int = 100
         private set
     var pitch: Int
         private set
-    var length: Int = 2
+    //var length: Int = 2
+    var lengthStart: Int = 0
+        private set
+    var lengthEnd: Int = 0
         private set
 
     @JvmField
@@ -41,7 +42,6 @@ class RecordedSample private constructor(
     var isModulatingSaw: Boolean = false
     var isReRecording: Boolean = false
         private set
-    var r: Random = Random()
 
 
     init {
@@ -63,8 +63,8 @@ class RecordedSample private constructor(
         // Set looping, if needed.
         if (isLooped) {
             // The actual amount of frames in a PCM file is half of the raw byte size.
-            Log.d("debug length", length.toString())
-            audioTrack!!.setLoopPoints(0, bytes.size / this.length, -1)
+            //Log.d("debug length", length.toString())
+            audioTrack!!.setLoopPoints(lengthStart / 2, lengthEnd / 2, -1)
         } else {
             audioTrack!!.setLoopPoints(0, 0, 0)
         }
@@ -97,8 +97,14 @@ class RecordedSample private constructor(
     }
 
     @Synchronized
-    fun adjustPlayLength(i: Int) {
-        this.length = i
+    fun adjustLengthStart(i: Int) {
+        this.lengthStart = i
+        if (isLooping) play(true)
+    }
+
+    @Synchronized
+    fun adjustLengthEnd(i: Int) {
+        this.lengthEnd = i
         if (isLooping) play(true)
     }
 
@@ -191,6 +197,8 @@ class RecordedSample private constructor(
 
         // Write the audio bytes to the audioTrack to play back.
         audioTrack!!.write(bytes, 0, bytes.size)
+        this.lengthStart = 0
+        this.lengthEnd = bytes.size
     }
 
     //I think each sample should have its own recorder. what could go wrong

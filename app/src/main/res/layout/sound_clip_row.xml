@@ -1,39 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="146dp">
+    android:layout_height="220dp"
+    android:orientation="horizontal">
 
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
-        <SeekBar
-            android:id="@+id/volume_slider"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:progressDrawable="@drawable/seek_bar"
-            android:thumb="@drawable/seek_thumb"/>
+            android:layout_weight="1">
 
-        <SeekBar
-            android:id="@+id/pitch_slider"
+            <SeekBar
+                android:id="@+id/volume_slider"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:progressDrawable="@drawable/seek_bar"
+                android:thumb="@drawable/seek_thumb"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/volume_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/volume_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text=""
+                app:layout_constraintDimensionRatio="w,1.5:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/volume_slider"
+                app:layout_constraintTop_toTopOf="@+id/volume_slider" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:progressDrawable="@drawable/seek_bar_pitch"
-            android:thumb="@drawable/seek_thumb_pitch"/>
+            android:layout_weight="1">
 
-        <SeekBar
+            <SeekBar
+                android:id="@+id/pitch_slider"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:progressDrawable="@drawable/seek_bar_pitch"
+                android:thumb="@drawable/seek_thumb_pitch"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/pitch_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <EditText
+                android:id="@+id/pitch_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text=""
+                app:layout_constraintDimensionRatio="w,1.5:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pitch_slider"
+                app:layout_constraintTop_toTopOf="@+id/pitch_slider" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+
+            <EditText
+                android:id="@+id/length_start"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text=""
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/length_end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/length_end"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text=""
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/length_total"
+                app:layout_constraintStart_toEndOf="@+id/length_start"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/length_total"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/length_end"
+                app:layout_constraintEnd_toEndOf="@id/length_in_seconds"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/length_in_seconds"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="w,2:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/length_total"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--<SeekBar
             android:id="@+id/length_slider"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:progressDrawable="@drawable/seek_bar_length"
-            android:thumb="@drawable/seek_thumb_length"/>
+            android:thumb="@drawable/seek_thumb_length" />-->
 
         <SeekBar
             android:id="@+id/randomizer_speed_slider"
@@ -41,7 +135,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:progressDrawable="@drawable/seek_bar_randomize"
-            android:thumb="@drawable/seek_thumb_randomize"/>
+            android:thumb="@drawable/seek_thumb_randomize" />
 
         <SeekBar
             android:id="@+id/randomizer_intensity_slider"
@@ -49,16 +143,15 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:progressDrawable="@drawable/seek_bar_length"
-            android:thumb="@drawable/seek_thumb_length"/>
+            android:thumb="@drawable/seek_thumb_length" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="4dp"
-            android:background="@android:color/darker_gray"/>
+            android:background="@android:color/darker_gray" />
 
 
     </LinearLayout>
-
 
 
     <!--<Button
@@ -78,43 +171,43 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="156dp"
+            android:layout_width="120dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="horizontal">
 
-                <CheckBox
-                    android:id="@+id/octave"
-                    style="?android:buttonBarButtonStyle"
-                    android:layout_width="52dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/mute_button"
-                    android:button="@android:color/transparent"
-                    android:text="OCTA"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+            <CheckBox
+                android:id="@+id/octave"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/mute_button"
+                android:button="@android:color/transparent"
+                android:text="OCTA"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/rerecord"
-                    android:layout_width="52dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/rerecord_button"
-                    android:button="@android:color/transparent"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:text="@string/record"
-                    style="?android:buttonBarButtonStyle" />
+            <CheckBox
+                android:id="@+id/rerecord"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/rerecord_button"
+                android:button="@android:color/transparent"
+                android:text="@string/record"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/loop"
-                    android:layout_width="52dp"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/loop_button"
-                    android:button="@android:color/transparent"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:text="@string/loop"
-                    style="?android:buttonBarButtonStyle" />
+            <CheckBox
+                android:id="@+id/loop"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/loop_button"
+                android:button="@android:color/transparent"
+                android:text="@string/loop"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -127,7 +220,7 @@
             <CheckBox
                 android:id="@+id/randomizer"
                 style="?android:buttonBarButtonStyle"
-                android:layout_width="52dp"
+                android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/randomize_button"
                 android:button="@android:color/transparent"
@@ -138,7 +231,7 @@
             <CheckBox
                 android:id="@+id/sine"
                 style="?android:buttonBarButtonStyle"
-                android:layout_width="52dp"
+                android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/randomize_button"
                 android:button="@android:color/transparent"
@@ -149,7 +242,7 @@
             <CheckBox
                 android:id="@+id/saw"
                 style="?android:buttonBarButtonStyle"
-                android:layout_width="52dp"
+                android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/randomize_button"
                 android:button="@android:color/transparent"
@@ -162,7 +255,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="4dp"
-            android:background="@android:color/darker_gray"/>
+            android:background="@android:color/darker_gray" />
 
     </LinearLayout>
 
